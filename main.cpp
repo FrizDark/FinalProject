@@ -5,7 +5,6 @@ int main() {
 
     MenuClass m;
 
-    // First comment
     m.MainMenu();
 
     return 0;

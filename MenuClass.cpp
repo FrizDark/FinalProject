@@ -54,17 +54,21 @@ void MenuClass::ModelMenu() {
         mtc.print();
         string s;
         ModelStruct m;
-        cout << "Марка -> ";
-        cin >> s;
-        m["Mark"] = s;
-        vector<ModelStruct> a = mtc.find([s](ModelStruct el) { return *el.Values["Mark"].value.tstring == s;});
-        cout << "Модель -> ";
-        cin >> s;
-        m["Model"] = s;
-        mtc.find([s](ModelStruct el) {return *el.Values["Model"].value.tstring == s;}, &a);
-        cout << "Тип -> ";
-        cin >> s;
-        m["Type"] = s;
+        vector<ModelStruct> a;
+        for (auto &i : m.Fields) {
+            if (i.first == "ID") {
+                continue;
+            }
+            mtc.print(&a);
+            cout << i.second.Description << " -> ";
+            cin >> s;
+            if (!a.empty()) {
+                a = mtc.find([i, s](ModelStruct el) {return *el.Values[i.first].value.tstring == s;}, &a);
+            } else {
+                a = mtc.find([i, s](ModelStruct el) { return *el.Values[i.first].value.tstring == s;});
+            }
+            m[i.first] = s;
+        }
         return m;
     };
     std::function<ModelStruct()> Adder = [](){
@@ -76,13 +80,13 @@ void MenuClass::ModelMenu() {
         ModelStruct m;
 
         for (auto &i : m.Fields) {
-            if (i.first.first == "ID") {
+            if (i.first == "ID") {
                 m["ID"] = to_string(gen());
                 continue;
             }
-            cout << i.first.second << " -> ";
+            cout << i.second.Description << " -> ";
             cin >> s;
-            m.Values[i.first.first] = s;
+            m.Values[i.first] = s;
         }
 
         return m;
@@ -125,16 +129,16 @@ void MenuClass::ModelMenu() {
                 mtc.print();
                 n = 1;
                 for (auto &i : m.Fields) {
-                    if (i.first.first == "ID") continue;
-                    cout << "| " << n << " | " << i.first.second << " |" << endl;
+                    if (i.first == "ID") continue;
+                    cout << "| " << n << " | " << i.second.Description << " |" << endl;
                     n++;
                 }
                 n = 1;
                 cout << "Поле -> "; cin >> pos;
                 for (auto &i : m.Fields) {
-                    if (i.first.first == "ID") continue;
+                    if (i.first == "ID") continue;
                     if (n == pos) {
-                        field = i.first.first;
+                        field = i.first;
                         break;
                     }
                     n++;

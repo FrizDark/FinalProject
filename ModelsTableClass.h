@@ -16,7 +16,7 @@ private:
     void loadArray(ModelStruct &m, pt::ptree root);
 
     pt::ptree saver();
-    pt::ptree saver(ElementValue i, map<pair<string, string>, ElementType> b);
+    pt::ptree saver(ElementValue i, map<std::string, TypeName> b);
     pt::ptree saver(ModelStruct i);
 public:
     list<ModelStruct> Models;

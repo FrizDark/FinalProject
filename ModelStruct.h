@@ -16,6 +16,11 @@ enum ElementType {
     tobject
 };
 
+struct TypeName {
+    ElementType Type;
+    string Description;
+};
+
 struct ModelStruct;
 
 struct ElementValue {
@@ -45,7 +50,7 @@ struct ElementValue {
 };
 
 struct ModelStruct {
-    map<pair<string, string>, ElementType> Fields;
+    map<std::string, TypeName> Fields;
     map<std::string, ElementValue> Values;
 
     string ID();

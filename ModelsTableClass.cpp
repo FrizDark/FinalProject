@@ -22,12 +22,11 @@ void ModelsTableClass::add(ModelStruct m) {
 
 void ModelsTableClass::print(vector<ModelStruct> *vv) {
     cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-//    cout << "| Марка               | Модель              | Тип                 |" << endl;
     ModelStruct mm;
     for (auto &i : mm.Fields) {
-        if (i.first.first == "ID") continue;
-        cout << "| " << i.first.second;
-        int j = i.first.second.length()/2;
+        if (i.first == "ID") continue;
+        cout << "| " << i.second.Description;
+        int j = i.second.Description.length() / 2;
         for (int a = 0; a < 20 - j; a++) cout << " ";
     }
     cout << "|" << endl;
@@ -145,7 +144,7 @@ void ModelsTableClass::Delete(ModelStruct m) {
     }
 }
 
-pt::ptree ModelsTableClass::saver(ElementValue i, map<pair<string, string>, ElementType> b) {
+pt::ptree ModelsTableClass::saver(ElementValue i, map<std::string, TypeName> b) {
     pt::ptree rootObject, rootObjectElements, rOEE;
     switch (i.type) {
         case empty:
@@ -258,7 +257,6 @@ vector<ModelStruct> ModelsTableClass::find(std::function<bool(const ModelStruct 
             output.push_back(m);
         }
     }
-    print(&output);
     return output;
 }
 

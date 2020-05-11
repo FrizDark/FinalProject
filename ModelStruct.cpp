@@ -68,6 +68,8 @@ ElementValue::ElementValue(const ElementValue &src) {
         case tobject:
             value.tobject = src.value.tobject;
             break;
+        default:
+            break;
     }
 }
 
@@ -89,15 +91,21 @@ ElementValue &ElementValue::operator=(const ElementValue &src) {
         case tobject:
             value.tobject = new ModelStruct(*src.value.tobject);
             break;
+        default:
+            break;
     }
     return *this;
 }
 
 ModelStruct::ModelStruct() {
-    Fields.insert(make_pair(make_pair("ID", "ID"), tstring));
-    Fields.insert(make_pair(make_pair("Mark", "Марка"), tstring));
-    Fields.insert(make_pair(make_pair("Model", "Модель"), tstring));
-    Fields.insert(make_pair(make_pair("Type", "Тип"), tstring));
+    TypeName TN = {tstring, "ID"};
+    Fields.insert(make_pair("ID", TN));
+    TN = {tstring, "Марка"};
+    Fields.insert(make_pair("Mark", TN));
+    TN = {tstring, "Модель"};
+    Fields.insert(make_pair("Model", TN));
+    TN = {tstring, "Тип"};
+    Fields.insert(make_pair("Type", TN));
 }
 
 ModelStruct::ModelStruct(string Mark) {
@@ -130,12 +138,12 @@ string ModelStruct::type() {
 }
 
 ModelStruct::ModelStruct(const ModelStruct &src) {
-    Fields = map<pair<string, string>, ElementType>(src.Fields);
+    Fields = map<std::string, TypeName>(src.Fields);
     Values = map<std::string, ElementValue>(src.Values);
 }
 
 ModelStruct &ModelStruct::operator=(const ModelStruct &src) {
-    Fields = map<pair<string, string>, ElementType>(src.Fields);
+    Fields = map<std::string, TypeName>(src.Fields);
     Values = map<std::string, ElementValue>(src.Values);
     return *this;
 }
