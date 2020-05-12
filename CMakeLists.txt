@@ -7,4 +7,4 @@ set(CMAKE_CXX_STANDARD 14)
 
 include_directories(/usr/local/Cellar/boost/1.72.0_2/include)
 
-add_executable(FinalProjectCPP main.cpp ModelsTableClass.cpp ModelStruct.cpp MenuClass.cpp MenuClass.h)
+add_executable(FinalProjectCPP main.cpp Model.cpp Menu.cpp Menu.h)

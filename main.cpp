@@ -1,9 +1,9 @@
-#include "MenuClass.h"
+#include "Menu.h"
 
 int main() {
     setlocale(LC_ALL, "rus");
 
-    MenuClass m;
+    Menu m;
 
     m.MainMenu();
 

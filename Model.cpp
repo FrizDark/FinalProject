@@ -2,7 +2,7 @@
 // Created by Dmitriy Steshenko on 01.05.2020.
 //
 
-#include "ModelStruct.h"
+#include "Model.h"
 
 ElementValue::ElementValue(int i) {
     type = tnumber;
@@ -29,9 +29,9 @@ ElementValue::ElementValue(std::vector<ElementValue> const &i) {
     value.tarray = new vector<ElementValue>(i);
 }
 
-ElementValue::ElementValue(ModelStruct const &i) {
+ElementValue::ElementValue(Model &i) {
     type = tobject;
-    value.tobject = new ModelStruct(i);
+    value.tobject = i.clone();
 }
 
 ElementValue::~ElementValue() {
@@ -42,6 +42,7 @@ ElementValue::~ElementValue() {
         case tarray:
             delete value.tarray;
             break;
+            //TODO: Fix this
 //        case tobject:
 //            delete value.tobject;
 //            break;
@@ -66,7 +67,7 @@ ElementValue::ElementValue(const ElementValue &src) {
             value.tarray = new std::vector<ElementValue>(*src.value.tarray);
             break;
         case tobject:
-            value.tobject = src.value.tobject;
+            value.tobject = src.value.tobject->clone();
             break;
         default:
             break;
@@ -89,7 +90,7 @@ ElementValue &ElementValue::operator=(const ElementValue &src) {
             value.tarray = new std::vector<ElementValue>(*src.value.tarray);
             break;
         case tobject:
-            value.tobject = new ModelStruct(*src.value.tobject);
+            value.tobject = src.value.tobject->clone();
             break;
         default:
             break;
@@ -97,65 +98,20 @@ ElementValue &ElementValue::operator=(const ElementValue &src) {
     return *this;
 }
 
-ModelStruct::ModelStruct() {
-    TypeName TN = {tstring, "ID"};
-    Fields.insert(make_pair("ID", TN));
-    TN = {tstring, "Марка"};
-    Fields.insert(make_pair("Mark", TN));
-    TN = {tstring, "Модель"};
-    Fields.insert(make_pair("Model", TN));
-    TN = {tstring, "Тип"};
-    Fields.insert(make_pair("Type", TN));
-}
-
-ModelStruct::ModelStruct(string Mark) {
-    ModelStruct();
-    random_generator gen;
-    Values.insert(std::make_pair("ID", to_string(gen())));
-    Values.insert(std::make_pair("Mark", Mark));
-}
-
-ModelStruct::ModelStruct(string Id, string Mark) {
-    ModelStruct();
-    Values.insert(std::make_pair("ID", Id));
-    Values.insert(std::make_pair("Mark", Mark));
-}
-
-string ModelStruct::ID() {
-    return *(Values["ID"].value.tstring);
-}
-
-string ModelStruct::mark()  {
-    return *(Values["Mark"].value.tstring);
-}
-
-string ModelStruct::model() {
-    return *(Values["Model"].value.tstring);
-}
-
-string ModelStruct::type() {
-    return *(Values["Type"].value.tstring);
-}
-
-ModelStruct::ModelStruct(const ModelStruct &src) {
-    Fields = map<std::string, TypeName>(src.Fields);
-    Values = map<std::string, ElementValue>(src.Values);
-}
-
-ModelStruct &ModelStruct::operator=(const ModelStruct &src) {
-    Fields = map<std::string, TypeName>(src.Fields);
-    Values = map<std::string, ElementValue>(src.Values);
+Model &Model::operator=(const Model &src) {
+    _values = map<std::string, ElementValue>(src._values);
     return *this;
 }
 
-ElementValue &ModelStruct::operator[](const string &idx) {
-    return Values[idx];
+ElementValue &Model::operator[](const string &name) {
+    //TODO: Check name in the fields
+    auto value = _values.find(name);
+    if (value == _values.end()) {
+        _values[name] = new ElementValue();
+    }
+    return _values[name];
 }
 
-std::vector<ElementValue> ModelStruct::array() {
-    return *(Values["Array"].value.tarray);
-}
-
-ModelStruct ModelStruct::object() {
-    return *(Values["Object"].value.tobject);
+const ElementValue Model::operator[] (const string &name) const {
+    return _values.at(name);
 }

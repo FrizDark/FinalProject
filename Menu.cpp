@@ -2,9 +2,9 @@
 // Created by Dmitriy Steshenko on 09.05.2020.
 //
 
-#include "MenuClass.h"
+#include "Menu.h"
 
-void MenuClass::MainMenu() {
+void Menu::MainMenu() {
     bool Exit = true;
     int menu = 0;
     while (Exit) {
@@ -33,29 +33,27 @@ void MenuClass::MainMenu() {
     }
 }
 
-void MenuClass::ModelMenu() {
-    static ModelsTableClass mtc;
-
-
+void Menu::ModelMenu() {
+    static CarModelTable mtc;
 
     bool Exit = true;
     int menu = 0;
-    ModelStruct m;
+    CarModelModel m;
     string s;
 
     int n = 1;
     int pos = 0;
     string field, value;
 
-    std::function<ModelStruct()> Finder = [](){
+    std::function<CarModelModel()> Finder = [](){
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "|                              Поиск                              |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         mtc.print();
         string s;
-        ModelStruct m;
-        vector<ModelStruct> a;
-        for (auto &i : m.Fields) {
+        CarModelModel m;
+        vector<CarModelModel> a;
+        for (auto &i : m.Fields()) {
             if (i.first == "ID") {
                 continue;
             }
@@ -63,30 +61,30 @@ void MenuClass::ModelMenu() {
             cout << i.second.Description << " -> ";
             cin >> s;
             if (!a.empty()) {
-                a = mtc.find([i, s](ModelStruct el) {return *el.Values[i.first].value.tstring == s;}, &a);
+                a = mtc.find([i, s](CarModelModel el) {return *el[i.first].value.tstring == s;}, &a);
             } else {
-                a = mtc.find([i, s](ModelStruct el) { return *el.Values[i.first].value.tstring == s;});
+                a = mtc.find([i, s](CarModelModel el) { return *el[i.first].value.tstring == s;});
             }
             m[i.first] = s;
         }
         return m;
     };
-    std::function<ModelStruct()> Adder = [](){
+    std::function<CarModelModel()> Adder = [](){
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "|                             Создать                             |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         random_generator gen;
         string s;
-        ModelStruct m;
+        CarModelModel m;
 
-        for (auto &i : m.Fields) {
+        for (auto &i : m.Fields()) {
             if (i.first == "ID") {
                 m["ID"] = to_string(gen());
                 continue;
             }
             cout << i.second.Description << " -> ";
             cin >> s;
-            m.Values[i.first] = s;
+            m[i.first] = s;
         }
 
         return m;
@@ -111,10 +109,14 @@ void MenuClass::ModelMenu() {
                 mtc.add(Adder());
                 break;
             case 2:
-                mtc.Delete(Finder());
+                mtc.remove(Finder());
                 break;
             case 3:
-                mtc.update(Finder(), Adder());
+                m = Finder();
+                s = *m["ID"].value.tstring;
+                m = Adder();
+                m["ID"] = s;
+                mtc.update(m);
                 break;
             case 4:
                 mtc.print();
@@ -128,14 +130,14 @@ void MenuClass::ModelMenu() {
             case 7:
                 mtc.print();
                 n = 1;
-                for (auto &i : m.Fields) {
+                for (auto &i : m.Fields()) {
                     if (i.first == "ID") continue;
                     cout << "| " << n << " | " << i.second.Description << " |" << endl;
                     n++;
                 }
                 n = 1;
                 cout << "Поле -> "; cin >> pos;
-                for (auto &i : m.Fields) {
+                for (auto &i : m.Fields()) {
                     if (i.first == "ID") continue;
                     if (n == pos) {
                         field = i.first;
@@ -144,7 +146,7 @@ void MenuClass::ModelMenu() {
                     n++;
                 }
                 cout << "Значение -> "; cin >> value;
-                mtc.find([field, value](ModelStruct el) {return *el.Values[field].value.tstring == value;});
+                mtc.find([field, value](CarModelModel el) {return *el[field].value.tstring == value;});
                 break;
             default:
                 cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
