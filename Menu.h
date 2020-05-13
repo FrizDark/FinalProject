@@ -9,7 +9,12 @@
 
 class Menu {
 private:
-    void ModelMenu();
+    void CarModelMenu();
+    void CarMenu();
+
+    CarModelTable _carModelMenu;
+    CarTable _carMenu;
+
 public:
     void MainMenu();
 };

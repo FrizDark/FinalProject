@@ -19,7 +19,7 @@ protected:
         int buf;
         int space = 0;
         for (auto &t : m.Fields()) {
-            if (t.first == "ID") continue;
+            if (t.second.Description == "ID") continue;
             switch (m[t.first].type) {
                 case tnumber:
                     cout << "| " << m[t.first].value.tnumber;
@@ -212,7 +212,7 @@ public:
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         T mm;
         for (auto &i : mm.Fields()) {
-            if (i.first == "ID") continue;
+            if (i.second.Description == "ID") continue;
             cout << "| " << i.second.Description;
             int j = i.second.Description.length() / 2;
             for (int a = 0; a < 20 - j; a++) cout << " ";
@@ -228,6 +228,21 @@ public:
                 print(m);
             }
         }
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+    }
+
+    void printM(const Model& m) {
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        T mm;
+        for (auto &i : mm.Fields()) {
+            if (i.second.Description == "ID") continue;
+            cout << "| " << i.second.Description;
+            int j = i.second.Description.length() / 2;
+            for (int a = 0; a < 20 - j; a++) cout << " ";
+        }
+        cout << "|" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        print(m);
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
     }
     void load() {
@@ -287,7 +302,7 @@ public:
         int ihNum = 0;
         for (auto &i : _elements) {
             for (auto j : i.Fields()) {
-                if (j.first == "ID") continue;
+                if (j.second.Description == "ID") continue;
                 if (*m[j.first].value.tstring == *i[j.first].value.tstring) {
                     ihNum++;
                 }
@@ -362,9 +377,18 @@ public:
     }
 };
 
+
+
+
+
 class CarModelTable: public Table<CarModelModel> {
 public:
     CarModelTable():Table<CarModelModel>("Models") {}
+};
+
+class CarTable: public Table<CarModel> {
+public:
+    CarTable():Table<CarModel>("Cars") {}
 };
 
 

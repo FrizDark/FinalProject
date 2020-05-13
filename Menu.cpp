@@ -16,14 +16,16 @@ void Menu::MainMenu() {
         cout << "-> "; cin >> menu;
         switch (menu) {
             case 0:
+                //TODO: Save all
                 Exit = false;
                 break;
             case 1:
                 break;
             case 2:
-                ModelMenu();
+                CarModelMenu();
                 break;
             case 3:
+                CarMenu();
                 break;
             default:
                 cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
@@ -33,8 +35,8 @@ void Menu::MainMenu() {
     }
 }
 
-void Menu::ModelMenu() {
-    static CarModelTable mtc;
+void Menu::CarModelMenu() {
+    static CarModelTable carModelTable = _carModelMenu;
 
     bool Exit = true;
     int menu = 0;
@@ -49,21 +51,30 @@ void Menu::ModelMenu() {
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "|                              Поиск                              |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        mtc.print();
+        carModelTable.print();
         string s;
         CarModelModel m;
         vector<CarModelModel> a;
         for (auto &i : m.Fields()) {
-            if (i.first == "ID") {
+            if (i.second.Description == "ID") {
                 continue;
             }
-            mtc.print(&a);
+            if (!a.empty()) carModelTable.print(&a);
             cout << i.second.Description << " -> ";
             cin >> s;
             if (!a.empty()) {
-                a = mtc.find([i, s](CarModelModel el) {return *el[i.first].value.tstring == s;}, &a);
+                a = carModelTable.find([i, s](CarModelModel el) {return *el[i.first].value.tstring == s;}, &a);
             } else {
-                a = mtc.find([i, s](CarModelModel el) { return *el[i.first].value.tstring == s;});
+                a = carModelTable.find([i, s](CarModelModel el) { return *el[i.first].value.tstring == s;});
+            }
+            if (a.empty()) {
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                cout << "|                           Не найдено                            |" << endl;
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+            }
+            if (a.size() == 1) {
+                carModelTable.print(&a);
+                return a[0];
             }
             m[i.first] = s;
         }
@@ -78,7 +89,7 @@ void Menu::ModelMenu() {
         CarModelModel m;
 
         for (auto &i : m.Fields()) {
-            if (i.first == "ID") {
+            if (i.second.Description == "ID") {
                 m["ID"] = to_string(gen());
                 continue;
             }
@@ -92,13 +103,15 @@ void Menu::ModelMenu() {
 
     while (Exit) {
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "| 1              Добавить модель | Удалить модель               2 |" << endl;
+        cout << "|                             Модель                              |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "| 3         Редактировать модель | Показать модели              4 |" << endl;
+        cout << "| 1 |                   Добавить | Удалить                    | 2 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "| 5             Сохранить модели | Загрузить модели             6 |" << endl;
+        cout << "| 3 |              Редактировать | Показать                   | 4 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "| 7                        Найти | Назад                        0 |" << endl;
+        cout << "| 5 |                  Сохранить | Загрузить                  | 6 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 7 |                      Найти | Назад                      | 0 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "-> "; cin >> menu;
         switch (menu) {
@@ -106,47 +119,186 @@ void Menu::ModelMenu() {
                 Exit = false;
                 break;
             case 1:
-                mtc.add(Adder());
+                carModelTable.add(Adder());
                 break;
             case 2:
-                mtc.remove(Finder());
+                carModelTable.remove(Finder());
                 break;
             case 3:
                 m = Finder();
                 s = *m["ID"].value.tstring;
                 m = Adder();
                 m["ID"] = s;
-                mtc.update(m);
+                carModelTable.update(m);
                 break;
             case 4:
-                mtc.print();
+                carModelTable.print();
                 break;
             case 5:
-                mtc.save();
+                carModelTable.save();
                 break;
             case 6:
-                mtc.load();
+                carModelTable.load();
                 break;
             case 7:
-                mtc.print();
-                n = 1;
-                for (auto &i : m.Fields()) {
-                    if (i.first == "ID") continue;
-                    cout << "| " << n << " | " << i.second.Description << " |" << endl;
-                    n++;
+                carModelTable.printM(Finder());
+            break;
+            default:
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                cout << "|                          Попробуйте ещё                         |" << endl;
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        }
+    }
+    _carModelMenu = carModelTable;
+}
+
+void Menu::CarMenu() {
+    static CarTable carTable = _carMenu;
+
+    bool Exit = true;
+    int menu = 0;
+    CarModel m;
+    string s, field, value;
+    int n = 1;
+    int pos;
+
+    std::function<CarModel()> Finder = [](){
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "|                              Поиск                              |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        carTable.print();
+        string s;
+        CarModel m;
+        vector<CarModel> a;
+
+        for (auto &i : m.Fields()) {
+            if (i.second.Description == "ID") {
+                continue;
+            }
+            if (!a.empty()) carTable.print(&a);
+            cout << i.second.Description << " -> ";
+            cin >> s;
+            if (!a.empty()) {
+                a = carTable.find([i, s](CarModel el) {return *el[i.first].value.tstring == s;}, &a);
+            } else {
+                a = carTable.find([i, s](CarModel el) { return *el[i.first].value.tstring == s;});
+            }
+            if (a.empty()) {
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                cout << "|                           Не найдено                            |" << endl;
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+            }
+            if (a.size() == 1) {
+                carTable.print(&a);
+                return a[0];
+            }
+            m[i.first] = s;
+        }
+        return m;
+    };
+    std::function<CarModel(CarModelTable carModelTable)> Adder = [](CarModelTable carModelTable){
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "|                             Создать                             |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        random_generator gen;
+        string s;
+        CarModel m;
+
+        CarModelModel cmm;
+
+        carModelTable.print();
+        vector<CarModelModel> a;
+        for (auto &i : cmm.Fields()) {
+            if (i.second.Description == "ID") {
+                continue;
+            }
+            if (!a.empty()) carModelTable.print(&a);
+            cout << i.second.Description << " -> ";
+            cin >> s;
+            if (!a.empty()) {
+                a = carModelTable.find([i, s](CarModelModel el) {return *el[i.first].value.tstring == s;}, &a);
+            } else {
+                a = carModelTable.find([i, s](CarModelModel el) { return *el[i.first].value.tstring == s;});
+            }
+            if (a.empty()) {
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                cout << "|                           Не найдено                            |" << endl;
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+            }
+            if (a.size() == 1) {
+                carModelTable.print(&a);
+                cmm = a[0];
+                break;
+            }
+            cmm[i.first] = s;
+        }
+        cmm["ID"] = *a[0]["ID"].value.tstring;
+        a.clear();
+        s.clear();
+
+        for (auto &i : m.Fields()) {
+            if (i.second.Description == "ID") {
+                if (i.first == "ID") {
+                    m["ID"] = to_string(gen());
+                } else {
+                    m["MarkID"] = *cmm["ID"].value.tstring;
                 }
-                n = 1;
-                cout << "Поле -> "; cin >> pos;
-                for (auto &i : m.Fields()) {
-                    if (i.first == "ID") continue;
-                    if (n == pos) {
-                        field = i.first;
-                        break;
-                    }
-                    n++;
-                }
-                cout << "Значение -> "; cin >> value;
-                mtc.find([field, value](CarModelModel el) {return *el[field].value.tstring == value;});
+                continue;
+            }
+            if (i.first == "Mark") {
+                m["Mark"] = *cmm["Mark"].value.tstring;
+                continue;
+            }
+            cout << i.second.Description << " -> ";
+            cin >> s;
+            m[i.first] = s;
+        }
+
+        return m;
+    };
+
+    while (Exit) {
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "|                            Автомобиль                           |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 1 |                   Добавить | Удалить                    | 2 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 3 |              Редактировать | Показать                   | 4 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 5 |                  Сохранить | Загрузить                  | 6 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 7 |                      Найти | Назад                      | 0 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "-> "; cin >> menu;
+        switch (menu) {
+            case 0:
+                Exit = false;
+                break;
+            case 1:
+                carTable.add(Adder(_carModelMenu));
+                break;
+            case 2:
+                carTable.remove(Finder());
+                break;
+            case 3:
+                m = Finder();
+                s = *m["ID"].value.tstring;
+                m = Adder(_carModelMenu);
+                m["ID"] = s;
+                carTable.update(m);
+                break;
+            case 4:
+                carTable.print();
+                break;
+            case 5:
+                carTable.save();
+                break;
+            case 6:
+                _carModelMenu.load();
+                carTable.load();
+                break;
+            case 7:
+                carTable.printM(Finder());
                 break;
             default:
                 cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
@@ -154,4 +306,5 @@ void Menu::ModelMenu() {
                 cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         }
     }
+    _carMenu = carTable;
 }

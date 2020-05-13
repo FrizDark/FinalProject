@@ -100,4 +100,29 @@ public:
 
 };
 
+class CarModel: public Model {
+protected:
+    virtual map<std::string, TypeName> fields() const {
+        map<std::string, TypeName> f;
+        TypeName tn = {tstring, "ID"};
+        f.insert(make_pair("ID", tn));
+        tn = {tstring, "ID"};
+        f.insert(make_pair("MarkID", tn));
+        tn = {tstring, "Марка"};
+        f.insert(make_pair("Mark", tn));
+        tn = {tstring, "Цвет"};
+        f.insert(make_pair("Color", tn));
+        tn = {tnumber, "Цена"};
+        f.insert(make_pair("Price", tn));
+        return f;
+    }
+
+public:
+    CarModel() {}
+    CarModel(const CarModel& src):Model(src) {}
+
+    virtual Model* clone() { return new CarModel(*this); }
+
+};
+
 #endif //FINALPROJECTCPP_MODEL_H
