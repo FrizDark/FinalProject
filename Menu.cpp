@@ -20,6 +20,7 @@ void Menu::MainMenu() {
                 Exit = false;
                 break;
             case 1:
+                ManagerMenu();
                 break;
             case 2:
                 CarModelMenu();
@@ -307,4 +308,122 @@ void Menu::CarMenu() {
         }
     }
     _carMenu = carTable;
+}
+
+void Menu::ManagerMenu() {
+    static ManagerTable managerTable = _managerMenu;
+
+    bool Exit = true;
+    int menu = 0;
+    ManagerModel m;
+    string s;
+
+    int n = 1;
+    int pos = 0;
+    string field, value;
+
+    std::function<ManagerModel()> Finder = [](){
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "|                              Поиск                              |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        managerTable.print();
+        string s;
+        ManagerModel m;
+        vector<ManagerModel> a;
+        for (auto &i : m.Fields()) {
+            if (i.second.Description == "ID") {
+                continue;
+            }
+            if (!a.empty()) managerTable.print(&a);
+            cout << i.second.Description << " -> ";
+            cin >> s;
+            if (!a.empty()) {
+                a = managerTable.find([i, s](ManagerModel el) {return *el[i.first].value.tstring == s;}, &a);
+            } else {
+                a = managerTable.find([i, s](ManagerModel el) { return *el[i.first].value.tstring == s;});
+            }
+            if (a.empty()) {
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                cout << "|                           Не найдено                            |" << endl;
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+            }
+            if (a.size() == 1) {
+                managerTable.print(&a);
+                return a[0];
+            }
+            m[i.first] = s;
+        }
+        return m;
+    };
+    std::function<ManagerModel()> Adder = [](){
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "|                             Создать                             |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        random_generator gen;
+        string s;
+        int n;
+        ManagerModel m;
+
+        for (auto &i : m.Fields()) {
+            if (i.second.Description == "ID") {
+                m["ID"] = to_string(gen());
+                continue;
+            }
+            cout << i.second.Description << " -> ";
+            cin >> s;
+            m[i.first] = s;
+        }
+
+        return m;
+    };
+
+    while (Exit) {
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "|                             Модель                              |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 1 |                   Добавить | Удалить                    | 2 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 3 |              Редактировать | Показать                   | 4 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 5 |                  Сохранить | Загрузить                  | 6 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 7 |                      Найти | Назад                      | 0 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "-> "; cin >> menu;
+        switch (menu) {
+            case 0:
+                Exit = false;
+                break;
+            case 1:
+                managerTable.add(Adder());
+                break;
+            case 2:
+                managerTable.remove(Finder());
+                break;
+            case 3:
+                m = Finder();
+                s = *m["ID"].value.tstring;
+                m = Adder();
+                m["ID"] = s;
+                managerTable.update(m);
+                break;
+            case 4:
+                managerTable.print();
+                break;
+            case 5:
+                managerTable.save();
+                break;
+            case 6:
+                managerTable.load();
+                break;
+            case 7:
+                managerTable.printM(Finder());
+                break;
+            default:
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                cout << "|                          Попробуйте ещё                         |" << endl;
+                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        }
+    }
+    _managerMenu = managerTable;
 }

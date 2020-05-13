@@ -209,8 +209,17 @@ public:
         _elements.push_back(m);
     }
     void print(vector<T> *vv = NULL) {
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        int length;
         T mm;
+        for (auto &i : mm.Fields()) {
+            if (i.second.Description == "ID") continue;
+            length += 22;
+        }
+        length++;
+        for (int i = 0; i < length; i++) {
+            cout << "–";
+        }
+        cout << endl;
         for (auto &i : mm.Fields()) {
             if (i.second.Description == "ID") continue;
             cout << "| " << i.second.Description;
@@ -218,7 +227,10 @@ public:
             for (int a = 0; a < 20 - j; a++) cout << " ";
         }
         cout << "|" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        for (int i = 0; i < length; i++) {
+            cout << "–";
+        }
+        cout << endl;
         if (vv) {
             for (auto &m : *vv) {
                 print(m);
@@ -228,12 +240,24 @@ public:
                 print(m);
             }
         }
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        for (int i = 0; i < length; i++) {
+            cout << "–";
+        }
+        cout << endl;
     }
 
     void printM(const Model& m) {
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        int length;
         T mm;
+        for (auto &i : mm.Fields()) {
+            if (i.second.Description == "ID") continue;
+            length += 22;
+        }
+        length++;
+        for (int i = 0; i < length; i++) {
+            cout << "–";
+        }
+        cout << endl;
         for (auto &i : mm.Fields()) {
             if (i.second.Description == "ID") continue;
             cout << "| " << i.second.Description;
@@ -241,9 +265,15 @@ public:
             for (int a = 0; a < 20 - j; a++) cout << " ";
         }
         cout << "|" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        for (int i = 0; i < length; i++) {
+            cout << "–";
+        }
+        cout << endl;
         print(m);
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        for (int i = 0; i < length; i++) {
+            cout << "–";
+        }
+        cout << endl;
     }
     void load() {
         pt::ptree root;
@@ -307,7 +337,7 @@ public:
                     ihNum++;
                 }
             }
-            if (ihNum == 3) {
+            if (ihNum == i.Fields().size() - 1) {
                 IsHere = true;
                 break;
             } else {
@@ -391,5 +421,9 @@ public:
     CarTable():Table<CarModel>("Cars") {}
 };
 
+class ManagerTable: public Table<ManagerModel> {
+public:
+    ManagerTable():Table<ManagerModel>("Managers") {}
+};
 
 #endif //FINALPROJECTCPP_TABLE_H

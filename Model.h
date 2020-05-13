@@ -79,18 +79,7 @@ public:
 
 class CarModelModel: public Model {
 protected:
-    virtual map<std::string, TypeName> fields() const {
-        map<std::string, TypeName> f;
-        TypeName tn = {tstring, "ID"};
-        f.insert(make_pair("ID", tn));
-        tn = {tstring, "Марка"};
-        f.insert(make_pair("Mark", tn));
-        tn = {tstring, "Модель"};
-        f.insert(make_pair("Model", tn));
-        tn = {tstring, "Тип"};
-        f.insert(make_pair("Type", tn));
-        return f;
-    }
+    virtual map<std::string, TypeName> fields() const;
 
 public:
     CarModelModel() {}
@@ -102,26 +91,25 @@ public:
 
 class CarModel: public Model {
 protected:
-    virtual map<std::string, TypeName> fields() const {
-        map<std::string, TypeName> f;
-        TypeName tn = {tstring, "ID"};
-        f.insert(make_pair("ID", tn));
-        tn = {tstring, "ID"};
-        f.insert(make_pair("MarkID", tn));
-        tn = {tstring, "Марка"};
-        f.insert(make_pair("Mark", tn));
-        tn = {tstring, "Цвет"};
-        f.insert(make_pair("Color", tn));
-        tn = {tnumber, "Цена"};
-        f.insert(make_pair("Price", tn));
-        return f;
-    }
+    virtual map<std::string, TypeName> fields() const;
 
 public:
     CarModel() {}
     CarModel(const CarModel& src):Model(src) {}
 
     virtual Model* clone() { return new CarModel(*this); }
+
+};
+
+class ManagerModel: public Model {
+protected:
+    virtual map<std::string, TypeName> fields() const;
+
+public:
+    ManagerModel() {}
+    ManagerModel(const ManagerModel& src):Model(src) {}
+
+    virtual Model* clone() { return new ManagerModel(*this); }
 
 };
 

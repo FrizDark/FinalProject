@@ -115,3 +115,48 @@ ElementValue &Model::operator[](const string &name) {
 const ElementValue Model::operator[] (const string &name) const {
     return _values.at(name);
 }
+
+map<std::string, TypeName> CarModelModel::fields() const {
+    map<std::string, TypeName> f;
+    TypeName tn = {tstring, "ID"};
+    f.insert(make_pair("ID", tn));
+    tn = {tstring, "Марка"};
+    f.insert(make_pair("Mark", tn));
+    tn = {tstring, "Модель"};
+    f.insert(make_pair("Model", tn));
+    tn = {tstring, "Тип"};
+    f.insert(make_pair("Type", tn));
+    return f;
+}
+
+map<std::string, TypeName> CarModel::fields() const {
+    map<std::string, TypeName> f;
+    TypeName tn = {tstring, "ID"};
+    f.insert(make_pair("ID", tn));
+    tn = {tstring, "ID"};
+    f.insert(make_pair("MarkID", tn));
+    tn = {tstring, "Марка"};
+    f.insert(make_pair("Mark", tn));
+    tn = {tstring, "Цвет"};
+    f.insert(make_pair("Color", tn));
+    tn = {tnumber, "Цена"};
+    f.insert(make_pair("Price", tn));
+    return f;
+}
+
+map<std::string, TypeName> ManagerModel::fields() const {
+    map<std::string, TypeName> f;
+    TypeName tn = {tstring, "ID"};
+    f.insert(make_pair("ID", tn));
+    tn = {tstring, "Имя"};
+    f.insert(make_pair("FirstName", tn));
+    tn = {tstring, "Фамилия"};
+    f.insert(make_pair("LastName", tn));
+    tn = {tnumber, "Возраст"};
+    f.insert(make_pair("Age", tn));
+    tn = {tstring, "Город"};
+    f.insert(make_pair("City", tn));
+    tn = {tnumber, "Номер_телефона"};
+    f.insert(make_pair("MobileNumber", tn));
+    return f;
+}
