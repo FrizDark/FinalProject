@@ -116,7 +116,7 @@ const ElementValue Model::operator[] (const string &name) const {
     return _values.at(name);
 }
 
-map<std::string, TypeName> CarModelModel::fields() const {
+const map<std::string, TypeName> ModelModel::Fields() const {
     map<std::string, TypeName> f;
     TypeName tn = {tstring, "ID"};
     f.insert(make_pair("ID", tn));
@@ -129,7 +129,7 @@ map<std::string, TypeName> CarModelModel::fields() const {
     return f;
 }
 
-map<std::string, TypeName> CarModel::fields() const {
+const map<std::string, TypeName> CarModel::Fields() const {
     map<std::string, TypeName> f;
     TypeName tn = {tstring, "ID"};
     f.insert(make_pair("ID", tn));
@@ -144,7 +144,7 @@ map<std::string, TypeName> CarModel::fields() const {
     return f;
 }
 
-map<std::string, TypeName> ManagerModel::fields() const {
+const map<std::string, TypeName> ManagerModel::Fields() const {
     map<std::string, TypeName> f;
     TypeName tn = {tstring, "ID"};
     f.insert(make_pair("ID", tn));

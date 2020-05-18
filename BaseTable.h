@@ -1,0 +1,32 @@
+//
+// Created by Dmitriy Steshenko on 14.05.2020.
+//
+
+#ifndef FINALPROJECTCPP_BASETABLE_H
+#define FINALPROJECTCPP_BASETABLE_H
+
+#include "Model.h"
+
+class BaseTable {
+protected:
+    std::string m_name;
+    list<Model*> m_elements;
+
+    BaseTable(const std::string& name):m_name(name) {}
+    virtual ~BaseTable() {}
+
+//    void print(const Model* m);
+
+    pt::ptree saver(const Model& i);
+    pt::ptree saver();
+    pt::ptree saver(ElementValue i, map<std::string, TypeName> b);
+
+public:
+    inline const std::string name() { return m_name; }
+    inline const list<Model*> elements() { return m_elements; }
+
+    bool save();
+
+};
+
+#endif //FINALPROJECTCPP_BASETABLE_H//

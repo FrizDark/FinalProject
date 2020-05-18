@@ -5,7 +5,7 @@
 #ifndef FINALPROJECTCPP_MENU_H
 #define FINALPROJECTCPP_MENU_H
 
-#include "Table.h"
+#include "View.h"
 
 class Menu {
 private:
@@ -13,7 +13,7 @@ private:
     void CarMenu();
     void ManagerMenu();
 
-    CarModelTable _carModelMenu;
+    ModelTable _carModelMenu;
     CarTable _carMenu;
     ManagerTable _managerMenu;
 

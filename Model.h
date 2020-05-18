@@ -61,11 +61,12 @@ protected:
         _values = map<std::string, ElementValue>(src._values);
     }
 
-    virtual map<std::string, TypeName> fields() const = 0;
 
 public:
 
-    inline const map<std::string, TypeName> Fields() const { return fields(); }
+    virtual const map<std::string, TypeName> Fields() const = 0;
+
+    //    inline const map<std::string, TypeName> Fields() const { return fields(); }
     inline const map<std::string, ElementValue> Values() const { return _values; }
     inline const void insert(pair<string, ElementValue> src) { _values.insert(src); }
     inline const void clear() { _values.clear(); }
@@ -77,38 +78,32 @@ public:
 
 };
 
-class CarModelModel: public Model {
-protected:
-    virtual map<std::string, TypeName> fields() const;
-
+class ModelModel: public Model {
 public:
-    CarModelModel() {}
-    CarModelModel(const CarModelModel& src):Model(src) {}
+    ModelModel() {}
+    ModelModel(const ModelModel& src): Model(src) {}
 
-    virtual Model* clone() { return new CarModelModel(*this); }
+    const map<std::string, TypeName> Fields() const;
+    virtual Model* clone() { return new ModelModel(*this); }
 
 };
 
 class CarModel: public Model {
-protected:
-    virtual map<std::string, TypeName> fields() const;
-
 public:
     CarModel() {}
     CarModel(const CarModel& src):Model(src) {}
 
+    virtual const map<std::string, TypeName> Fields() const;
     virtual Model* clone() { return new CarModel(*this); }
 
 };
 
 class ManagerModel: public Model {
-protected:
-    virtual map<std::string, TypeName> fields() const;
-
 public:
     ManagerModel() {}
     ManagerModel(const ManagerModel& src):Model(src) {}
 
+    virtual const map<std::string, TypeName> Fields() const;
     virtual Model* clone() { return new ManagerModel(*this); }
 
 };

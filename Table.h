@@ -5,18 +5,68 @@
 #ifndef FINALPROJECTCPP_TABLE_H
 #define FINALPROJECTCPP_TABLE_H
 
-#include "IncludeLib.h"
-#include "Model.h"
+#include "BaseTable.h"
 
 template<class T>
-class Table {
-private:
-    std::string _name;
-    list<T> _elements;
-
+class Table: public BaseTable {
 protected:
+    void loadObject(T *m, pt::ptree root) {
+        T *m1 = new T();
+        string objectName;
+        for (auto &i : (*m).Fields()) {
+            if (i.second.Type == tobject) {
+                objectName = i.first;
+                break;
+            }
+        }
+        if (objectName.empty()) {
+            return;
+        }
+        for(auto &i : root.get_child(objectName)) {
+            for (auto &j : i.second) {
+                if (i.first == objectName) {
+                    loadObject(m1, j.second);
+                } else {
+                    (*m1).insert(std::make_pair(j.first, j.second.data()));
+                }
+            }
+        }
+        (*m)[objectName] = m1;
+    }
+    void loadArray(T *m, pt::ptree root) {
+        T *m1 = new T();
+        vector<ElementValue> v;
+        string arrayName;
+        for (auto &i : (*m).Fields()) {
+            if (i.second.Type == tarray) {
+                arrayName = i.first;
+                break;
+            }
+        }
+        if (arrayName.empty()) {
+            return;
+        }
+        for(auto &i : root.get_child(arrayName)) {
+            if (i.first == arrayName) {
+                loadArray(m1, i.second);
+                v.emplace_back((*m1)[i.first].value.tarray);
+            } else {
+                v.emplace_back(i.second.data());
+            }
+        }
+        (*m)[arrayName] = v;
+    }
+
+public:
+    Table(const std::string& name):BaseTable(name) {}
+
+    inline const std::string name() { return m_name; }
+
+    void add(T& m) {
+        m_elements.push_back(&m);
+    }
     void print(const Model& m) {
-        int buf;
+        double buf;
         int space = 0;
         for (auto &t : m.Fields()) {
             if (t.second.Description == "ID") continue;
@@ -57,157 +107,6 @@ protected:
         }
         cout << "|" << endl;
     }
-
-    void loadObject(T &m, pt::ptree root) {
-        T m1;
-        string objectName;
-        for (auto &i : m.Fields()) {
-            if (i.second.Type == tobject) {
-                objectName = i.first;
-                break;
-            }
-        }
-        if (objectName.empty()) {
-            return;
-        }
-        for(auto &i : root.get_child(objectName)) {
-            for (auto &j : i.second) {
-                if (i.first == objectName) {
-                    loadObject(m1, j.second);
-                } else {
-                    m1.insert(std::make_pair(j.first, j.second.data()));
-                }
-            }
-        }
-        m[objectName] = m1;
-    }
-    void loadArray(T &m, pt::ptree root) {
-        T m1;
-        vector<ElementValue> v;
-        string arrayName;
-        for (auto &i : m.Fields()) {
-            if (i.second.Type == tarray) {
-                arrayName = i.first;
-                break;
-            }
-        }
-        if (arrayName.empty()) {
-            return;
-        }
-        for(auto &i : root.get_child(arrayName)) {
-            if (i.first == arrayName) {
-                loadArray(m1, i.second);
-                v.emplace_back(m1[i.first].value.tarray);
-            } else {
-                v.emplace_back(i.second.data());
-            }
-        }
-        m[arrayName] = v;
-    }
-
-    pt::ptree saver(const Model& i) {
-        pt::ptree rootObject, rootObjectElements, rOEE;
-        for (auto &j : i.Values()) {
-            switch (j.second.type) {
-                case empty:
-                    rootObjectElements.put(j.first, NULL);
-                    break;
-                case tnumber:
-                    rootObjectElements.put(j.first, i[j.first].value.tnumber);
-                    break;
-                case tboolean:
-                    rootObjectElements.put(j.first, i[j.first].value.tboolean);
-                    break;
-                case tstring:
-                    rootObjectElements.put(j.first, *i[j.first].value.tstring);
-                    break;
-                case tarray:
-                    for (auto a = i[j.first].value.tarray->cbegin(); a != i[j.first].value.tarray->cend(); a++) {
-                        rOEE.push_back(std::make_pair("", saver(*a, i.Fields())));
-                    }
-                    rootObjectElements.add_child(j.first, rOEE);
-                    rOEE.clear();
-                    break;
-                case tobject:
-                    rootObjectElements.add_child(j.first, saver(*i[j.first].value.tobject));
-                    break;
-            }
-        }
-        rootObject.push_back(std::make_pair("", rootObjectElements));
-        rootObjectElements.clear();
-        return rootObject;
-    }
-
-    pt::ptree saver() {
-        pt::ptree rootObject, rootObjectElements, rOEE;
-        for (auto &i : _elements) {
-            for (auto &j : i.Values()) {
-                switch (j.second.type) {
-                    case empty:
-                        rootObjectElements.put(j.first, NULL);
-                        break;
-                    case tnumber:
-                        rootObjectElements.put(j.first, i[j.first].value.tnumber);
-                        break;
-                    case tboolean:
-                        rootObjectElements.put(j.first, i[j.first].value.tboolean);
-                        break;
-                    case tstring:
-                        rootObjectElements.put(j.first, *i[j.first].value.tstring);
-                        break;
-                    case tarray:
-                        for (auto a = i[j.first].value.tarray->cbegin(); a != i[j.first].value.tarray->cend(); a++) {
-                            rOEE.push_back(std::make_pair("", saver(*a, i.Fields())));
-                        }
-                        rootObjectElements.add_child(j.first, rOEE);
-                        rOEE.clear();
-                        break;
-                    case tobject:
-                        rootObjectElements.add_child(j.first, saver(*i[j.first].value.tobject));
-                        break;
-                }
-            }
-            rootObject.push_back(std::make_pair("", rootObjectElements));
-            rootObjectElements.clear();
-        }
-        return rootObject;
-    }
-    pt::ptree saver(ElementValue i, const map<std::string, TypeName> b) {
-        pt::ptree rootObject, rootObjectElements, rOEE;
-        switch (i.type) {
-            case empty:
-                rootObjectElements.put("", NULL);
-                break;
-            case tnumber:
-                rootObjectElements.put("", i.value.tnumber);
-                break;
-            case tboolean:
-                rootObjectElements.put("", i.value.tboolean);
-                break;
-            case tstring:
-                rootObjectElements.put("", *i.value.tstring);
-                break;
-            case tarray:
-                for (auto a = i.value.tarray->cbegin(); a != i.value.tarray->cend(); a++) {
-                    rOEE.push_back(std::make_pair("", saver(*a, b)));
-                }
-                rootObjectElements.add_child("", rOEE);
-                break;
-            case tobject:
-                rootObjectElements.add_child("", saver(*i.value.tobject));
-                break;
-        }
-        return rootObjectElements;
-    }
-
-public:
-    Table(const std::string& name):_name(name) {}
-
-    inline const std::string name() { return _name; }
-
-    void add(T m) {
-        _elements.push_back(m);
-    }
     void print(vector<T> *vv = NULL) {
         int length;
         T mm;
@@ -216,9 +115,7 @@ public:
             length += 22;
         }
         length++;
-        for (int i = 0; i < length; i++) {
-            cout << "–";
-        }
+        for (int i = 0; i < length; i++) cout << "–";
         cout << endl;
         for (auto &i : mm.Fields()) {
             if (i.second.Description == "ID") continue;
@@ -227,17 +124,15 @@ public:
             for (int a = 0; a < 20 - j; a++) cout << " ";
         }
         cout << "|" << endl;
-        for (int i = 0; i < length; i++) {
-            cout << "–";
-        }
+        for (int i = 0; i < length; i++) cout << "–";
         cout << endl;
         if (vv) {
             for (auto &m : *vv) {
                 print(m);
             }
         } else {
-            for (auto &m : _elements) {
-                print(m);
+            for (auto &m : m_elements) {
+                print(*m);
             }
         }
         for (int i = 0; i < length; i++) {
@@ -245,7 +140,6 @@ public:
         }
         cout << endl;
     }
-
     void printM(const Model& m) {
         int length;
         T mm;
@@ -275,14 +169,15 @@ public:
         }
         cout << endl;
     }
-    void load() {
+    bool load() {
         pt::ptree root;
         string fileName = "../" + name() + "Data.json";
         pt::read_json(fileName, root);
-        T m;
+        T *m = new T();
+        T mm;
 
         string arrayName = "Array";
-        for (auto &i : m.Fields()) {
+        for (auto &i : (*m).Fields()) {
             if (i.second.Type == tarray) {
                 arrayName = i.first;
                 break;
@@ -290,7 +185,7 @@ public:
         }
 
         string objectName = "Object";
-        for (auto &i : m.Fields()) {
+        for (auto &i : (*m).Fields()) {
             if (i.second.Type == tobject) {
                 objectName = i.first;
                 break;
@@ -304,40 +199,26 @@ public:
                 } else if (a.first == objectName) {
                     loadObject(m, i.second);
                 } else {
-                    m[a.first] = a.second.data();
+                    (*m)[a.first] = a.second.data();
                 }
             }
-            _elements.push_back(m);
-            m.clear();
+            m_elements.push_back(new T(*m));
+            (*m).clear();
         }
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "|                              Успех                              |" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        return true;
     }
-    void save() {
-        pt::ptree root;
-        root.add_child(name(), saver());
-        /*TODO: Save in one file:
-         * string fileName = "../" + name() + ".json";
-         * pt::write_json(fileName, root);
-        */
-        pt::write_json("../TestJSON.json", root);
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "|                              Успех                              |" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-    }
-    void remove(T m) {
+    bool remove(T m) {
         int pos = 0;
         bool IsHere = false;
         int ihNum = 0;
-        for (auto &i : _elements) {
-            for (auto j : i.Fields()) {
+        for (auto &i : m_elements) {
+            for (auto j : i->Fields()) {
                 if (j.second.Description == "ID") continue;
-                if (*m[j.first].value.tstring == *i[j.first].value.tstring) {
+                if (*m[j.first].value.tstring == *(*i)[j.first].value.tstring) {
                     ihNum++;
                 }
             }
-            if (ihNum == i.Fields().size() - 1) {
+            if (ihNum == i->Fields().size() - 1) {
                 IsHere = true;
                 break;
             } else {
@@ -346,17 +227,12 @@ public:
             pos++;
         }
         if (IsHere) {
-            auto delPos = _elements.begin();
+            auto delPos = m_elements.begin();
             advance(delPos, pos);
-            _elements.erase(delPos);
-            cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-            cout << "|                              Успех                              |" << endl;
-            cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        } else {
-            cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-            cout << "|                           Не найдено                            |" << endl;
-            cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+            m_elements.erase(delPos);
+            return true;
         }
+        return false;
     }
     vector<T> find(std::function<bool(const T&)> filter = NULL, vector<T> *vv = NULL) {
         vector<T> output;
@@ -368,20 +244,20 @@ public:
                 output.push_back(m);
             }
         } else {
-            for (auto &m : _elements) {
-                if (filter && !filter(m)) {
+            for (auto &m : m_elements) {
+                if (filter && !filter(*((T*)m))) {
                     continue;
                 }
-                output.push_back(m);
+                output.push_back(*((T*)m));
             }
         }
         return output;
     }
-    void update(T m) {
+    bool update(T m) {
         int pos = 0;
         bool IsHere = false;
-        for (auto &i : _elements) {
-            if (*m["ID"].value.tstring == *i["ID"].value.tstring) {
+        for (auto &i : m_elements) {
+            if (*m["ID"].value.tstring == *(*i)["ID"].value.tstring) {
                 IsHere = true;
                 break;
             }
@@ -389,21 +265,19 @@ public:
         }
         if (IsHere) {
             int pos2 = 0;
-            for (auto &i : _elements) {
+            for (auto &i : m_elements) {
                 if (pos2 == pos) {
-                    i = m;
+                    i = new T(m);
                     break;
                 }
                 pos2++;
             }
-            cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-            cout << "|                              Успех                              |" << endl;
-            cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        } else {
-            cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-            cout << "|                           Не найдено                            |" << endl;
-            cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+//            for (auto &i : m_elements) {
+//
+//            }
+            return true;
         }
+        return false;
     }
 };
 
@@ -411,9 +285,9 @@ public:
 
 
 
-class CarModelTable: public Table<CarModelModel> {
+class ModelTable: public Table<ModelModel> {
 public:
-    CarModelTable():Table<CarModelModel>("Models") {}
+    ModelTable(): Table<ModelModel>("Models") {}
 };
 
 class CarTable: public Table<CarModel> {
