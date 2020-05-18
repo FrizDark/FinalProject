@@ -15,8 +15,6 @@ protected:
     BaseTable(const std::string& name):m_name(name) {}
     virtual ~BaseTable() {}
 
-//    void print(const Model* m);
-
     pt::ptree saver(const Model& i);
     pt::ptree saver();
     pt::ptree saver(ElementValue i, map<std::string, TypeName> b);
@@ -29,4 +27,4 @@ public:
 
 };
 
-#endif //FINALPROJECTCPP_BASETABLE_H//
+#endif //FINALPROJECTCPP_BASETABLE_H

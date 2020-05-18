@@ -65,8 +65,6 @@ protected:
 public:
 
     virtual const map<std::string, TypeName> Fields() const = 0;
-
-    //    inline const map<std::string, TypeName> Fields() const { return fields(); }
     inline const map<std::string, ElementValue> Values() const { return _values; }
     inline const void insert(pair<string, ElementValue> src) { _values.insert(src); }
     inline const void clear() { _values.clear(); }

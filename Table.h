@@ -272,9 +272,6 @@ public:
                 }
                 pos2++;
             }
-//            for (auto &i : m_elements) {
-//
-//            }
             return true;
         }
         return false;
