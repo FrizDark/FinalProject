@@ -60,6 +60,11 @@ protected:
 public:
     Table(const std::string& name):BaseTable(name) {}
 
+//    static auto& instance() {
+//        static Table<T> table;
+//        return table;
+//    }
+
     inline const std::string name() { return m_name; }
 
     void add(T& m) {
@@ -284,16 +289,31 @@ public:
 
 class ModelTable: public Table<ModelModel> {
 public:
+    static auto& instance() {
+        static ModelTable table;
+        return table;
+    }
+
     ModelTable(): Table<ModelModel>("Models") {}
 };
 
 class CarTable: public Table<CarModel> {
 public:
+    static auto& instance() {
+        static CarTable table;
+        return table;
+    }
+
     CarTable():Table<CarModel>("Cars") {}
 };
 
 class ManagerTable: public Table<ManagerModel> {
 public:
+    static auto& instance() {
+        static ManagerTable table;
+        return table;
+    }
+
     ManagerTable():Table<ManagerModel>("Managers") {}
 };
 

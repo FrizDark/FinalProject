@@ -4,14 +4,47 @@
 
 #include "Menu.h"
 
+void print_Success() {
+    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+    cout << "|                              Успех                              |" << endl;
+    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+}
+void print_NotFound() {
+    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+    cout << "|                           Не найдено                            |" << endl;
+    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+}
+void print_TryAgain() {
+    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+    cout << "|                          Попробуйте ещё                         |" << endl;
+    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+}
+void print_Search() {
+    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+    cout << "|                              Поиск                              |" << endl;
+    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+}
+void print_Create() {
+    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+    cout << "|                             Создать                             |" << endl;
+    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+}
+
+
+
 void Menu::MainMenu() {
     bool Exit = true;
     int menu = 0;
+
+    CarModelView cmv;
+
     while (Exit) {
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "| 1                    Менеджеры | Модели                       2 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "| 3                       Машины | Выход                        0 |" << endl;
+        cout << "| 3                       Машины | Показать машины и модели     4 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 5 Показать машины и менеджеров | Выход                        0 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "-> "; cin >> menu;
         switch (menu) {
@@ -28,16 +61,19 @@ void Menu::MainMenu() {
             case 3:
                 CarMenu();
                 break;
+            case 4:
+                cmv.print();
+                break;
+            case 5:
+                break;
             default:
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                cout << "|                          Попробуйте ещё                         |" << endl;
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                print_TryAgain();
         }
     }
 }
 
 void Menu::CarModelMenu() {
-    static ModelTable carModelTable = _carModelMenu;
+//    static ModelTable carModelTable = _carModelMenu;
 
     bool Exit = true;
     int menu = 0;
@@ -49,10 +85,8 @@ void Menu::CarModelMenu() {
     string field, value;
 
     std::function<ModelModel()> Finder = [](){
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "|                              Поиск                              |" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        carModelTable.print();
+        print_Search();
+        ModelTable::instance().print();
         string s;
         ModelModel m;
         vector<ModelModel> a;
@@ -60,21 +94,19 @@ void Menu::CarModelMenu() {
             if (i.second.Description == "ID") {
                 continue;
             }
-            if (!a.empty()) carModelTable.print(&a);
+            if (!a.empty()) ModelTable::instance().print(&a);
             cout << i.second.Description << " -> ";
             cin >> s;
             if (!a.empty()) {
-                a = carModelTable.find([i, s](ModelModel el) {return *el[i.first].value.tstring == s;}, &a);
+                a = ModelTable::instance().find([i, s](ModelModel el) {return *el[i.first].value.tstring == s;}, &a);
             } else {
-                a = carModelTable.find([i, s](ModelModel el) { return *el[i.first].value.tstring == s;});
+                a = ModelTable::instance().find([i, s](ModelModel el) { return *el[i.first].value.tstring == s;});
             }
             if (a.empty()) {
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                cout << "|                           Не найдено                            |" << endl;
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                print_NotFound();
             }
             if (a.size() == 1) {
-                carModelTable.print(&a);
+                ModelTable::instance().print(&a);
                 return a[0];
             }
             m[i.first] = s;
@@ -82,9 +114,7 @@ void Menu::CarModelMenu() {
         return m;
     };
     std::function<ModelModel*()> Adder = [](){
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "|                             Создать                             |" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        print_Create();
         random_generator gen;
         string s;
         ModelModel *m = new ModelModel();
@@ -120,10 +150,10 @@ void Menu::CarModelMenu() {
                 Exit = false;
                 break;
             case 1:
-                carModelTable.add(*Adder());
+                ModelTable::instance().add(*Adder());
                 break;
             case 2:
-                if (carModelTable.remove(Finder())) {
+                if (ModelTable::instance().remove(Finder())) {
                     cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
                     cout << "|                              Успех                              |" << endl;
                     cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
@@ -138,47 +168,37 @@ void Menu::CarModelMenu() {
                 s = *m["ID"].value.tstring;
                 m = *Adder();
                 m["ID"] = s;
-                if (carModelTable.update(m)) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                if (ModelTable::instance().update(m)) {
+                    print_Success();
                 } else {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                           Не найдено                            |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                    print_NotFound();
                 }
                 break;
             case 4:
-                carModelTable.print();
+                ModelTable::instance().print();
                 break;
             case 5:
-                if (carModelTable.save()) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                if (ModelTable::instance().save()) {
+                    print_Success();
                 }
                 break;
             case 6:
-                if (carModelTable.load()) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                if (ModelTable::instance().load()) {
+                    print_Success();
                 }
                 break;
             case 7:
-                carModelTable.printM(Finder());
+                ModelTable::instance().printM(Finder());
                 break;
             default:
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                cout << "|                          Попробуйте ещё                         |" << endl;
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                print_TryAgain();
         }
     }
-    _carModelMenu = carModelTable;
+//    _carModelMenu = carModelTable;
 }
 
 void Menu::CarMenu() {
-    static CarTable carTable = _carMenu;
+//    static CarTable carTable = _carMenu;
 
     bool Exit = true;
     int menu = 0;
@@ -188,10 +208,8 @@ void Menu::CarMenu() {
     int pos;
 
     std::function<CarModel()> Finder = [](){
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "|                              Поиск                              |" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        carTable.print();
+        print_Search();
+        CarTable::instance().print();
         string s;
         CarModel m;
         vector<CarModel> a;
@@ -200,21 +218,19 @@ void Menu::CarMenu() {
             if (i.second.Description == "ID") {
                 continue;
             }
-            if (!a.empty()) carTable.print(&a);
+            if (!a.empty()) CarTable::instance().print(&a);
             cout << i.second.Description << " -> ";
             cin >> s;
             if (!a.empty()) {
-                a = carTable.find([i, s](CarModel el) {return *el[i.first].value.tstring == s;}, &a);
+                a = CarTable::instance().find([i, s](CarModel el) {return *el[i.first].value.tstring == s;}, &a);
             } else {
-                a = carTable.find([i, s](CarModel el) { return *el[i.first].value.tstring == s;});
+                a = CarTable::instance().find([i, s](CarModel el) { return *el[i.first].value.tstring == s;});
             }
             if (a.empty()) {
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                cout << "|                           Не найдено                            |" << endl;
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                print_NotFound();
             }
             if (a.size() == 1) {
-                carTable.print(&a);
+                CarTable::instance().print(&a);
                 return a[0];
             }
             m[i.first] = s;
@@ -222,9 +238,7 @@ void Menu::CarMenu() {
         return m;
     };
     std::function<CarModel*(ModelTable carModelTable)> Adder = [](ModelTable carModelTable){
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "|                             Создать                             |" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        print_Create();
         random_generator gen;
         string s;
         CarModel *m = new CarModel();
@@ -246,9 +260,7 @@ void Menu::CarMenu() {
                 a = carModelTable.find([i, s](ModelModel el) { return *el[i.first].value.tstring == s;});
             }
             if (a.empty()) {
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                cout << "|                           Не найдено                            |" << endl;
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                print_NotFound();
             }
             if (a.size() == 1) {
                 carModelTable.print(&a);
@@ -266,7 +278,7 @@ void Menu::CarMenu() {
                 if (i.first == "ID") {
                     (*m)["ID"] = to_string(gen());
                 } else {
-                    (*m)["MarkID"] = *cmm["ID"].value.tstring;
+                    (*m)["Model_ID"] = *cmm["ID"].value.tstring;
                 }
                 continue;
             }
@@ -300,65 +312,52 @@ void Menu::CarMenu() {
                 Exit = false;
                 break;
             case 1:
-                carTable.add(*Adder(_carModelMenu));
+                CarTable::instance().add(*Adder(ModelTable::instance()));
                 break;
             case 2:
-                if (carTable.remove(Finder())) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                if (CarTable::instance().remove(Finder())) {
+                    print_Success();
                 } else {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                           Не найдено                            |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                    print_NotFound();
                 }
                 break;
             case 3:
                 m = Finder();
                 s = *m["ID"].value.tstring;
-                m = *Adder(_carModelMenu);
+                m = *Adder(ModelTable::instance());
                 m["ID"] = s;
-                if (carTable.update(m)) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                if (CarTable::instance().update(m)) {
+                    print_Success();
                 } else {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                           Не найдено                            |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                    print_NotFound();
                 }
                 break;
             case 4:
-                carTable.print();
+                CarTable::instance().print();
                 break;
             case 5:
-                if (carTable.save()) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                if (CarTable::instance().save()) {
+                    print_Success();
                 }
                 break;
             case 6:
-                if (_carModelMenu.load() && carTable.load()) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                if (ModelTable::instance().elements().empty()) ModelTable::instance().load();
+                if (CarTable::instance().load()) {
+                    print_Success();
                 }
                 break;
             case 7:
-                carTable.printM(Finder());
+                CarTable::instance().printM(Finder());
                 break;
             default:
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                cout << "|                          Попробуйте ещё                         |" << endl;
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                print_TryAgain();
         }
     }
-    _carMenu = carTable;
+//    _carMenu = carTable;
 }
 
 void Menu::ManagerMenu() {
-    static ManagerTable managerTable = _managerMenu;
+//    static ManagerTable managerTable = _managerMenu;
 
     bool Exit = true;
     int menu = 0;
@@ -370,10 +369,8 @@ void Menu::ManagerMenu() {
     string field, value;
 
     std::function<ManagerModel()> Finder = [](){
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "|                              Поиск                              |" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        managerTable.print();
+        print_Search();
+        ManagerTable::instance().print();
         string s;
         ManagerModel m;
         vector<ManagerModel> a;
@@ -381,21 +378,19 @@ void Menu::ManagerMenu() {
             if (i.second.Description == "ID") {
                 continue;
             }
-            if (!a.empty()) managerTable.print(&a);
+            if (!a.empty()) ManagerTable::instance().print(&a);
             cout << i.second.Description << " -> ";
             cin >> s;
             if (!a.empty()) {
-                a = managerTable.find([i, s](ManagerModel el) {return *el[i.first].value.tstring == s;}, &a);
+                a = ManagerTable::instance().find([i, s](ManagerModel el) {return *el[i.first].value.tstring == s;}, &a);
             } else {
-                a = managerTable.find([i, s](ManagerModel el) { return *el[i.first].value.tstring == s;});
+                a = ManagerTable::instance().find([i, s](ManagerModel el) { return *el[i.first].value.tstring == s;});
             }
             if (a.empty()) {
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                cout << "|                           Не найдено                            |" << endl;
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                print_NotFound();
             }
             if (a.size() == 1) {
-                managerTable.print(&a);
+                ManagerTable::instance().print(&a);
                 return a[0];
             }
             m[i.first] = s;
@@ -403,9 +398,7 @@ void Menu::ManagerMenu() {
         return m;
     };
     std::function<ManagerModel*()> Adder = [](){
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "|                             Создать                             |" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        print_Create();
         random_generator gen;
         string s;
         int n;
@@ -426,7 +419,7 @@ void Menu::ManagerMenu() {
 
     while (Exit) {
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "|                             Модель                              |" << endl;
+        cout << "|                            Менеджер                             |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "| 1 |                   Добавить | Удалить                    | 2 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
@@ -442,17 +435,13 @@ void Menu::ManagerMenu() {
                 Exit = false;
                 break;
             case 1:
-                managerTable.add(*Adder());
+                ManagerTable::instance().add(*Adder());
                 break;
             case 2:
-                if (managerTable.remove(Finder())) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                if (ManagerTable::instance().remove(Finder())) {
+                    print_Success();
                 } else {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                           Не найдено                            |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                    print_NotFound();
                 }
                 break;
             case 3:
@@ -460,41 +449,31 @@ void Menu::ManagerMenu() {
                 s = *m["ID"].value.tstring;
                 m = *Adder();
                 m["ID"] = s;
-                if (managerTable.update(m)) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                if (ManagerTable::instance().update(m)) {
+                    print_Success();
                 } else {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                           Не найдено                            |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                    print_NotFound();
                 }
                 break;
             case 4:
-                managerTable.print();
+                ManagerTable::instance().print();
                 break;
             case 5:
-                if (managerTable.save()) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                if (ManagerTable::instance().save()) {
+                    print_Success();
                 }
                 break;
             case 6:
-                if (managerTable.load()) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                if (ManagerTable::instance().load()) {
+                    print_Success();
                 }
                 break;
             case 7:
-                managerTable.printM(Finder());
+                ManagerTable::instance().printM(Finder());
                 break;
             default:
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                cout << "|                          Попробуйте ещё                         |" << endl;
-                cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                print_TryAgain();
         }
     }
-    _managerMenu = managerTable;
+//    _managerMenu = managerTable;
 }

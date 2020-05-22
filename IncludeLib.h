@@ -17,6 +17,10 @@ extern pt::ptree root;
 #include <boost/uuid/uuid_io.hpp>
 using namespace boost::uuids;
 
+// Tokenizer
+#include <boost/tokenizer.hpp>
+typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+
 // Other
 #include <iostream>
 #include <clocale>

@@ -90,7 +90,7 @@ ElementValue &ElementValue::operator=(const ElementValue &src) {
             value.tarray = new std::vector<ElementValue>(*src.value.tarray);
             break;
         case tobject:
-            value.tobject = src.value.tobject->clone();
+//            value.tobject = src.value.tobject->clone();
             break;
         default:
             break;
@@ -134,7 +134,7 @@ const map<std::string, TypeName> CarModel::Fields() const {
     TypeName tn = {tstring, "ID"};
     f.insert(make_pair("ID", tn));
     tn = {tstring, "ID"};
-    f.insert(make_pair("MarkID", tn));
+    f.insert(make_pair("Model_ID", tn));
     tn = {tstring, "Марка"};
     f.insert(make_pair("Mark", tn));
     tn = {tstring, "Цвет"};

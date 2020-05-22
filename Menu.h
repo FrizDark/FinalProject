@@ -13,9 +13,9 @@ private:
     void CarMenu();
     void ManagerMenu();
 
-    ModelTable _carModelMenu;
-    CarTable _carMenu;
-    ManagerTable _managerMenu;
+//    ModelTable _carModelMenu;
+//    CarTable _carMenu;
+//    ManagerTable _managerMenu;
 
 public:
     void MainMenu();
