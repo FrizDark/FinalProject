@@ -7,7 +7,29 @@
 
 #include "Table.h"
 
-class ViewModel {
+class ViewModel: public Model {
+protected:
+    map<std::string, TypeName> m_fields;
+
+public:
+    ViewModel(map<std::string, TypeName> fields, map<std::string, ElementValue> values) {
+        m_fields = fields;
+        for (auto &v : values) {
+            insert(v);
+        }
+    }
+    ViewModel(const ViewModel& src) {
+        m_fields = src.m_fields;
+        for (auto &v : src.Values()) {
+            insert(v);
+        }
+    }
+
+    const map<std::string, TypeName> Fields() const;
+    Model* clone();
+};
+
+class View {
 protected:
     struct JoinFields {
         BaseTable *leftTable;
@@ -19,45 +41,60 @@ protected:
     list<JoinFields> _joins;
 
     map<std::string, TypeName> m_fields;
-    map<std::string, ElementValue> m_values;
+//    vector<pair<std::string, ElementValue>> m_values;
+    vector<ViewModel*> m_values;
     vector<std::string> m_printFields;
 
     void join(BaseTable& ltable, const std::string& lfield, BaseTable& rtable, const std::string& rfield);
 
-public:
-
-    ViewModel(BaseTable& ltable, const std::string& lfield, BaseTable& rtable, const std::string& rfield);
-
-    void joinFields(list<JoinFields> joins);
-};
-
-class View: public ViewModel {
 private:
     virtual void print(pair<std::string, ElementValue> t);
 
 public:
-    View(BaseTable& ltable, const std::string lfield, BaseTable& rtable, const std::string rfield): ViewModel(ltable, lfield, rtable, rfield) {}
+    View(BaseTable& ltable, const std::string& lfield, BaseTable& rtable, const std::string& rfield);
 
     vector<pair<std::string, TypeName>> Fields();
 
-    vector<pair<std::string, ElementValue>> Values();
+    vector<ViewModel*> Values();
 
     ElementValue get(const std::string&);
 
     virtual void print();
-    vector<pair<std::string, ElementValue>> find(std::function<bool(pair<std::string, ElementValue>&)> filter = NULL);
+    vector<ViewModel*> find(std::function<bool(ViewModel* &)> filter = NULL);
 //    ElementValue operator[] (std::string);
+
+//    void joinFields(list<JoinFields> joins);
 };
 
 class CarModelView: public View {
 public:
     CarModelView():View(CarTable::instance(), "Model_ID", ModelTable::instance(), "ID") {
-        m_printFields.push_back("left.Color");
-        m_printFields.push_back("left.Mark");
-        m_printFields.push_back("left.Price");
-        m_printFields.push_back("right.Mark");
-        m_printFields.push_back("right.Model");
-        m_printFields.push_back("right.Type");
+        m_printFields.push_back(CarTable::instance().name() + ".Color");
+        m_printFields.push_back(CarTable::instance().name() + ".Price");
+
+        m_printFields.push_back(ModelTable::instance().name() + ".Mark");
+        m_printFields.push_back(ModelTable::instance().name() + ".Model");
+        m_printFields.push_back(ModelTable::instance().name() + ".Type");
+//        for (const auto &i : Fields()) m_fields.insert(i);
+//        for (const auto &i : Values()) m_values.push_back(i);
+    }
+};
+
+class CarManagerView: public View {
+public:
+    CarManagerView():View(CarManagerTable::instance(), "Car_ID", CarTable::instance(), "ID") {
+        join(CarManagerTable::instance(), "Manager_ID", ManagerTable::instance(), "ID");
+        m_printFields.push_back(CarTable::instance().name() + ".Mark");
+        m_printFields.push_back(CarTable::instance().name() + ".Color");
+        m_printFields.push_back(CarTable::instance().name() + ".Price");
+
+        m_printFields.push_back(ManagerTable::instance().name() + ".FirstName");
+        m_printFields.push_back(ManagerTable::instance().name() + ".LastName");
+        m_printFields.push_back(ManagerTable::instance().name() + ".Age");
+        m_printFields.push_back(ManagerTable::instance().name() + ".City");
+        m_printFields.push_back(ManagerTable::instance().name() + ".MobileNumber");
+//        for (const auto &i : Fields()) m_fields.insert(i);
+//        for (const auto &i : Values()) m_values.push_back(i);
     }
 };
 

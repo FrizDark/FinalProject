@@ -110,3 +110,14 @@ bool BaseTable::save() {
     pt::write_json("../TestJSON.json", root);
     return true;
 }
+
+vector<Model*> BaseTable::find(std::function<bool(const Model*)> filter) {
+    vector<Model*> output;
+    for (auto &m : m_elements) {
+        if (!filter(m)) {
+            continue;
+        }
+        output.push_back(m);
+    }
+    return output;
+}

@@ -6,6 +6,7 @@ int main() {
     ModelTable::instance().load();
     CarTable::instance().load();
     ManagerTable::instance().load();
+    CarManagerTable::instance().load();
 
     Menu m;
 

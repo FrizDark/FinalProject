@@ -113,7 +113,7 @@ public:
         cout << "|" << endl;
     }
     void print(vector<T> *vv = NULL) {
-        int length;
+        int length = 0;
         T mm;
         for (auto &i : mm.Fields()) {
             if (i.second.Description == "ID") continue;
@@ -146,7 +146,7 @@ public:
         cout << endl;
     }
     void printM(const Model& m) {
-        int length;
+        int length = 0;
         T mm;
         for (auto &i : mm.Fields()) {
             if (i.second.Description == "ID") continue;
@@ -315,6 +315,16 @@ public:
     }
 
     ManagerTable():Table<ManagerModel>("Managers") {}
+};
+
+class CarManagerTable: public Table<CarManagerModel> {
+public:
+    static auto& instance() {
+        static CarManagerTable table;
+        return table;
+    }
+
+    CarManagerTable():Table<CarManagerModel>("CarManagers") {}
 };
 
 #endif //FINALPROJECTCPP_TABLE_H

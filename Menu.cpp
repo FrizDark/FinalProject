@@ -37,15 +37,22 @@ void Menu::MainMenu() {
     int menu = 0;
 
     CarModelView cmv;
+    CarManagerView cmmv;
 
     while (Exit) {
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "| 1                    Менеджеры | Модели                       2 |" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "| 3                       Машины | Показать машины и модели     4 |" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-        cout << "| 5 Показать машины и менеджеров | Выход                        0 |" << endl;
-        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "––––––––––––––––––––––———————————–––-––––––––––––––––––––––––––––––––––——" << endl;
+        cout << "|                              Главное меню                             |" << endl;
+        cout << "––––––––––––––––––––––———————————–––-––––––––––––––––––––––––––––––––––——" << endl;
+        cout << "––––––––––––––––––––––———————————–––-––––––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 1                       Менеджеры | Модели                          2 |" << endl;
+        cout << "––––––––––––––––––––––———————————–––-––––––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 3                          Машины | Машины и менеджеры              4 |" << endl;
+        cout << "––––––––––––––––––––––———————————–––-––––––––––––––––––––––––––––––––––——" << endl;
+        cout << "––––––––––––––––––––––———————————–––-––––––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 5        Показать машины и модели | Показать машины и менеджеров    6 |" << endl;
+        cout << "––––––––––––––––––––––———————————–––-––––––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 0                               Выход                               0 |" << endl;
+        cout << "––––––––––––––––––––––———————————–––-––––––––––––––––––––––––––––––––––——" << endl;
         cout << "-> "; cin >> menu;
         switch (menu) {
             case 0:
@@ -62,9 +69,13 @@ void Menu::MainMenu() {
                 CarMenu();
                 break;
             case 4:
-                cmv.print();
+                CarManagerMenu();
                 break;
             case 5:
+                cmv.print();
+                break;
+            case 6:
+                cmmv.print();
                 break;
             default:
                 print_TryAgain();
@@ -73,7 +84,6 @@ void Menu::MainMenu() {
 }
 
 void Menu::CarModelMenu() {
-//    static ModelTable carModelTable = _carModelMenu;
 
     bool Exit = true;
     int menu = 0;
@@ -136,6 +146,7 @@ void Menu::CarModelMenu() {
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "|                             Модель                              |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "–––––––––––––––––––———————————–––-–––––––––––––––––––––––––––––––——" << endl;
         cout << "| 1 |                   Добавить | Удалить                    | 2 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "| 3 |              Редактировать | Показать                   | 4 |" << endl;
@@ -194,11 +205,9 @@ void Menu::CarModelMenu() {
                 print_TryAgain();
         }
     }
-//    _carModelMenu = carModelTable;
 }
 
 void Menu::CarMenu() {
-//    static CarTable carTable = _carMenu;
 
     bool Exit = true;
     int menu = 0;
@@ -298,6 +307,7 @@ void Menu::CarMenu() {
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "|                            Автомобиль                           |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "–––––––––––––––––––———————————–––-–––––––––––––––––––––––––––––––––" << endl;
         cout << "| 1 |                   Добавить | Удалить                    | 2 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "| 3 |              Редактировать | Показать                   | 4 |" << endl;
@@ -353,11 +363,9 @@ void Menu::CarMenu() {
                 print_TryAgain();
         }
     }
-//    _carMenu = carTable;
 }
 
 void Menu::ManagerMenu() {
-//    static ManagerTable managerTable = _managerMenu;
 
     bool Exit = true;
     int menu = 0;
@@ -421,6 +429,7 @@ void Menu::ManagerMenu() {
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "|                            Менеджер                             |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "–––––––––––––––––––———————————–––-–––––––––––––––––––––––––––––––––" << endl;
         cout << "| 1 |                   Добавить | Удалить                    | 2 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "| 3 |              Редактировать | Показать                   | 4 |" << endl;
@@ -475,5 +484,206 @@ void Menu::ManagerMenu() {
                 print_TryAgain();
         }
     }
-//    _managerMenu = managerTable;
+}
+
+void Menu::CarManagerMenu() {
+
+    bool Exit = true;
+    int menu = 0;
+    CarManagerModel m;
+    string s;
+
+    int n = 1;
+    int pos = 0;
+    string field, value;
+
+    std::function<CarManagerModel()> Finder = [](){
+        print_Search();
+        CarManagerTable::instance().print();
+        string s;
+        CarManagerModel m;
+        vector<CarManagerModel> a;
+
+        for (auto &i : m.Fields()) {
+            if (i.second.Description == "ID") {
+                continue;
+            }
+            if (!a.empty()) CarManagerTable::instance().print(&a);
+            cout << i.second.Description << " -> ";
+            cin >> s;
+            if (!a.empty()) {
+                a = CarManagerTable::instance().find([i, s](CarManagerModel el) {return *el[i.first].value.tstring == s;}, &a);
+            } else {
+                a = CarManagerTable::instance().find([i, s](CarManagerModel el) { return *el[i.first].value.tstring == s;});
+            }
+            if (a.empty()) {
+                print_NotFound();
+            }
+            if (a.size() == 1) {
+                CarManagerTable::instance().print(&a);
+                return a[0];
+            }
+            m[i.first] = s;
+        }
+        return m;
+    };
+
+    std::function<CarManagerModel*(ManagerTable managerTable, CarTable carTable)> Adder = [](ManagerTable managerTable, CarTable carTable){
+        print_Create();
+        random_generator gen;
+        string s;
+        CarManagerModel *m = new CarManagerModel();
+
+        CarModel cm;
+        ManagerModel mm;
+
+        carTable.print();
+        vector<CarModel> a;
+        for (auto &i : cm.Fields()) {
+            if (i.second.Description == "ID") {
+                continue;
+            }
+            if (!a.empty()) carTable.print(&a);
+            cout << i.second.Description << " -> ";
+            cin >> s;
+            if (!a.empty()) {
+                a = carTable.find([i, s](CarModel el) {return *el[i.first].value.tstring == s;}, &a);
+            } else {
+                a = carTable.find([i, s](CarModel el) { return *el[i.first].value.tstring == s;});
+            }
+            if (a.empty()) {
+                print_NotFound();
+            }
+            if (a.size() == 1) {
+                carTable.print(&a);
+                cm = a[0];
+                break;
+            }
+            cm[i.first] = s;
+        }
+        cm["ID"] = *a[0]["ID"].value.tstring;
+        a.clear();
+        s.clear();
+
+        managerTable.print();
+        vector<ManagerModel> aa;
+        for (auto &i : mm.Fields()) {
+            if (i.second.Description == "ID") {
+                continue;
+            }
+            if (!aa.empty()) managerTable.print(&aa);
+            cout << i.second.Description << " -> ";
+            cin >> s;
+            if (!aa.empty()) {
+                aa = managerTable.find([i, s](ManagerModel el) {return *el[i.first].value.tstring == s;}, &aa);
+            } else {
+                aa = managerTable.find([i, s](ManagerModel el) { return *el[i.first].value.tstring == s;});
+            }
+            if (aa.empty()) {
+                print_NotFound();
+            }
+            if (aa.size() == 1) {
+                managerTable.print(&aa);
+                mm = aa[0];
+                break;
+            }
+            mm[i.first] = s;
+        }
+        mm["ID"] = *aa[0]["ID"].value.tstring;
+        aa.clear();
+        s.clear();
+
+        for (auto &i : (*m).Fields()) {
+            if (i.second.Description == "ID") {
+                if (i.first == "Car_ID") {
+                    (*m)["Car_ID"] = *cm["ID"].value.tstring;
+                } else {
+                    (*m)["Manager_ID"] = *mm["ID"].value.tstring;
+                }
+                continue;
+            }
+            if (i.first == "LastName") {
+                (*m)["LastName"] = *mm["LastName"].value.tstring;
+                continue;
+            } else if (i.first == "City") {
+                (*m)["City"] = *mm["City"].value.tstring;
+                continue;
+            } else if (i.first == "MobileNumber") {
+                (*m)["MobileNumber"] = *mm["MobileNumber"].value.tstring;
+                continue;
+            } else if (i.first == "Mark") {
+                (*m)["Mark"] = *cm["Mark"].value.tstring;
+                continue;
+            } //else if (i.first == "Type") {
+//                (*m)["Type"] = *cm["Type"].value.tstring;
+//                continue;
+//            }
+//            cout << i.second.Description << " -> ";
+//            cin >> s;
+//            (*m)[i.first] = s;
+        }
+
+        return m;
+    };
+
+    while (Exit) {
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "|                         Машины и менеджеры                      |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "–––––––––––––––––––———————————–––-–––––––––––––––––––––––––––––––––" << endl;
+        cout << "| 1 |                   Добавить | Удалить                    | 2 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 3 |              Редактировать | Показать                   | 4 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 5 |                  Сохранить | Загрузить                  | 6 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "| 7 |                      Найти | Назад                      | 0 |" << endl;
+        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+        cout << "-> "; cin >> menu;
+        switch (menu) {
+            case 0:
+                Exit = false;
+                break;
+            case 1:
+                CarManagerTable::instance().add(*Adder(ManagerTable::instance(), CarTable::instance()));
+                break;
+            case 2:
+                if (CarManagerTable::instance().remove(Finder())) {
+                    print_Success();
+                } else {
+                    print_NotFound();
+                }
+                break;
+            case 3:
+                m = Finder();
+//                s = *m["ID"].value.tstring;
+                m = *Adder(ManagerTable::instance(), CarTable::instance());
+//                m["ID"] = s;
+                if (CarManagerTable::instance().update(m)) {
+                    print_Success();
+                } else {
+                    print_NotFound();
+                }
+                break;
+            case 4:
+                CarManagerTable::instance().print();
+                break;
+            case 5:
+                if (CarManagerTable::instance().save()) {
+                    print_Success();
+                }
+                break;
+            case 6:
+                if (ModelTable::instance().elements().empty()) ModelTable::instance().load();
+                if (CarTable::instance().load()) {
+                    print_Success();
+                }
+                break;
+            case 7:
+                CarManagerTable::instance().printM(Finder());
+                break;
+            default:
+                print_TryAgain();
+        }
+    }
 }

@@ -12,10 +12,7 @@ private:
     void CarModelMenu();
     void CarMenu();
     void ManagerMenu();
-
-//    ModelTable _carModelMenu;
-//    CarTable _carMenu;
-//    ManagerTable _managerMenu;
+    void CarManagerMenu();
 
 public:
     void MainMenu();

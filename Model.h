@@ -61,7 +61,6 @@ protected:
         _values = map<std::string, ElementValue>(src._values);
     }
 
-
 public:
 
     virtual const map<std::string, TypeName> Fields() const = 0;
@@ -103,6 +102,16 @@ public:
 
     virtual const map<std::string, TypeName> Fields() const;
     virtual Model* clone() { return new ManagerModel(*this); }
+
+};
+
+class CarManagerModel: public Model {
+public:
+    CarManagerModel() {}
+    CarManagerModel(const CarManagerModel& src):Model(src) {}
+
+    virtual const map<std::string, TypeName> Fields() const;
+    virtual Model* clone() { return new CarManagerModel(*this); }
 
 };
 

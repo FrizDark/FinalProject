@@ -4,46 +4,31 @@
 
 #include "View.h"
 
-ViewModel::ViewModel(BaseTable& ltable, const std::string& lfield, BaseTable& rtable, const std::string& rfield) {
+pair<std::string, std::string> Token(std::string src) {
+    boost::char_separator<char> sep{"."};
+    tokenizer tok(src, sep);
+    std::string first = "";
+    std::string second = "";
+    for (auto t = tok.begin(); t != tok.end(); t++) {
+        first = *t;
+        t++;
+        second = *t;
+        break;
+    }
+    return make_pair(first, second);
+}
+
+View::View(BaseTable& ltable, const std::string& lfield, BaseTable& rtable, const std::string& rfield) {
     join(ltable, lfield, rtable, rfield);
 }
 
-void ViewModel::join(BaseTable& ltable, const std::string& lfield, BaseTable& rtable, const std::string& rfield) {
+void View::join(BaseTable& ltable, const std::string& lfield, BaseTable& rtable, const std::string& rfield) {
     JoinFields jf = {&ltable, lfield, &rtable, rfield};
     _joins.push_back(jf);
 }
 
-void ViewModel::joinFields(list<JoinFields> joins) {
-    for (auto &i : joins) {
-
-        for (auto &j : i.leftTable->elements()) {
-            for (auto &h : j->Fields()) {
-                m_fields.insert(make_pair(h.first, h.second));
-            }
-            for (auto &h : j->Values()) {
-                m_values.insert(make_pair(h.first, h.second));
-            }
-        }
-        for (auto &j : i.rightTable->elements()) {
-            for (auto &h : j->Fields()) {
-                if (h.first == i.rightField) {
-                    m_fields.insert(make_pair(i.leftField, h.second));
-                }
-                m_fields.insert(make_pair(h.first, h.second));
-            }
-            for (auto &h : j->Values()) {
-                if (h.first == i.rightField) {
-                    m_values.insert(make_pair(i.leftField, h.second));
-                }
-                m_values.insert(make_pair(h.first, h.second));
-            }
-        }
-    }
-}
-
-vector<pair<std::string, ElementValue>>
-View::find(std::function<bool(pair<std::string, ElementValue> &)> filter) {
-    vector<pair<std::string, ElementValue>> output;
+vector<ViewModel*> View::find(std::function<bool(ViewModel* &)> filter) {
+    vector<ViewModel*> output;
     for (auto &m : Values()) {
         if (filter && !filter(m)) {
             continue;
@@ -55,6 +40,7 @@ View::find(std::function<bool(pair<std::string, ElementValue> &)> filter) {
 
 vector<pair<std::string, TypeName>> View::Fields() {
     vector<pair<std::string, TypeName>> f;
+    boost::char_separator<char> sep{"."};
     for (auto &i : _joins) {
         for (auto &j : i.leftTable->elements()) {
             for (auto &h : j->Fields()) {
@@ -76,85 +62,35 @@ vector<pair<std::string, TypeName>> View::Fields() {
     return f;
 }
 
-vector<pair<std::string, ElementValue>> View::Values() {
-    vector<pair<std::string, ElementValue>> v;
-    for (const auto &i : _joins) {
-        vector<pair<std::string, ElementValue>> left;
-        vector<pair<std::string, ElementValue>> right;
+vector<ViewModel*> View::Values() {
+    vector<ViewModel*> elements;
 
-        for (auto &i : _joins) {
-            for (auto &j : i.leftTable->elements()) {
-                for (auto &h : j->Values()) {
-                    left.push_back(make_pair(h.first, h.second));
+    for (auto &left : _joins.begin()->leftTable->elements()) {
+        map<std::string, TypeName> f;
+        map<std::string, ElementValue> v;
+        for (auto &fv : left->Fields()) {
+            f.insert(make_pair(_joins.begin()->leftTable->name() + "." + fv.first, fv.second));
+        }
+        for (auto &vv : left->Values()) {
+            v.insert(make_pair(_joins.begin()->leftTable->name() + "." + vv.first, vv.second));
+        }
+        for (auto &join : _joins) {
+            auto lid = *(*left)[join.leftField].value.tstring;
+            auto vals = join.rightTable->find([join, lid](const Model *el) {return *(*el)[join.rightField].value.tstring == lid;});
+            for (auto &m : vals) {
+                for (auto &fv : m->Fields()) {
+                    f.insert(make_pair(join.rightTable->name() + "." + fv.first, fv.second));
                 }
-            }
-            for (auto &j : i.rightTable->elements()) {
-                for (auto &h : j->Values()) {
-                    if (h.first == i.rightField) {
-                        right.push_back(make_pair(i.leftField, h.second));
-                        continue;
-                    }
-                    right.push_back(make_pair(h.first, h.second));
+                for (auto &vv : m->Values()) {
+                    v.insert(make_pair(join.rightTable->name() + "." + vv.first, vv.second));
                 }
+                break;
             }
         }
-
-        boost::char_separator<char> sep{"."};
-        bool isFind = false;
-        int idPos = 0;
-        vector <std::string> id;
-        for (const auto &j : i.leftTable->elements()) {
-            for (const auto &h : j->Values()) {
-                if (h.first == i.leftField) id.push_back(*h.second.value.tstring);
-            }
-        }
-        while (!left.empty() && !right.empty()) {
-            for (const auto &field : m_printFields) {
-                tokenizer tok{field, sep};
-                bool leftRight;
-                for (const auto &t : tok) {
-                    if (t == "left") {
-                        leftRight = true;
-                    } else if (t == "right") {
-                        leftRight = false;
-                    } else {
-                        if (leftRight) {
-                            for (auto j = left.begin(); j != left.end(); j++) {
-                                if (j->first == t) {
-                                    v.push_back(*j);
-                                    left.erase(j);
-                                    isFind = true;
-                                    break;
-                                }
-                            }
-                        } else {
-                            for (auto &j : i.rightTable->elements()) {
-                                for (auto &h : j->Values()) {
-                                    if (*h.second.value.tstring == id[idPos]) {
-                                        isFind = true;
-                                        break;
-                                    }
-                                }
-                                if (isFind) {
-                                    for (auto &h : j->Values()) {
-                                        if (h.first == t) {
-                                            v.push_back(h);
-                                            break;
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        if (!isFind) return v;
-                        else isFind = false;
-                    }
-                }
-            }
-            idPos++;
-        }
+        elements.push_back(new ViewModel(f, v));
     }
-    return v;
+
+    return elements;
 }
 
 void View::print(pair<std::string, ElementValue> t) {
@@ -197,49 +133,48 @@ void View::print(pair<std::string, ElementValue> t) {
 }
 
 void View::print() {
-    int length;
-    for (auto &i : Fields()) {
+    for (auto &i : Fields()) m_fields.insert(i);
+    for (auto &i : Values()) m_values.push_back(i);
+    int length = 0;
+    for (auto &i : m_fields) {
         if (i.second.Description == "ID") continue;
         length += 22;
     }
     length++;
     for (int i = 0; i < length; i++) cout << "–";
     cout << endl;
-    for (auto &i : Fields()) {
-        if (i.second.Description == "ID") continue;
-        cout << "| " << i.second.Description;
-        int j = i.second.Description.length() / 2;
-        for (int a = 0; a < 20 - j; a++) cout << " ";
+    for (auto &t : m_printFields) {
+        for (auto &i : m_fields) {
+            if (Token(t).second == i.first) {
+                cout << "| " << i.second.Description;
+                int j = i.second.Description.length() / 2;
+                for (int a = 0; a < 20 - j; a++) cout << " ";
+            }
+        }
     }
     cout << "|" << endl;
     for (int i = 0; i < length; i++) cout << "–";
     cout << endl;
 
-    int fs = 0;
-    auto f = Fields();
-    for (auto &t : Values()) {
-        if (fs == m_printFields.size()) {
-            fs = 0;
-            cout << "|" << endl;
+    for (auto &v : m_values) {
+        for (auto &t : m_printFields) {
+            for (auto &val : v->Values()) {
+                if (val.first == t) {
+                    print(val);
+                    break;
+                }
+            }
         }
-        if (t.first.find("ID") != std::string::npos) {
-            fs++;
-            continue;
-        }
-        print(t);
-        fs++;
+        cout << "|" << endl;
     }
-    cout << "|" << endl;
     for (int i = 0; i < length; i++) cout << "–";
     cout << endl;
 }
 
-//ElementValue View::operator[](std::string src) {
-//    return m_values[src];
-//}
+const map<std::string, TypeName> ViewModel::Fields() const {
+    return m_fields;
+}
 
-ElementValue View::get(const std::string& src) {
-    for (auto &v: Values()) {
-        if (v.first == src) return v.second;
-    }
+Model *ViewModel::clone() {
+    return new ViewModel(*this);
 }

@@ -25,6 +25,8 @@ public:
 
     bool save();
 
+    vector<Model*> find(std::function<bool(const Model*)> filter );
+
 };
 
 #endif //FINALPROJECTCPP_BASETABLE_H
