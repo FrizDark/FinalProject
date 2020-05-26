@@ -104,11 +104,18 @@ ElementValue::ElementValue(const char i[]) {
 }
 
 std::string ElementValue::asString() const {
+    char s[200];
+    long i;
     switch (type) {
         case empty:
             return "null";
         case tnumber:
-            return to_string(value.tnumber);
+            i = value.tnumber * 100;
+            if (i % 100 < 1) return to_string(i / 100);
+            else {
+                sprintf(s, "%.2f", value.tnumber);
+                return s;
+            }
         case tboolean:
             return value.tboolean ? "true" : "false";
         case tstring:
