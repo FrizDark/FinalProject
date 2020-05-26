@@ -75,38 +75,8 @@ public:
         int space = 0;
         for (auto &t : m.Fields()) {
             if (t.second.Description == "ID") continue;
-            switch (m[t.first].type) {
-                case tnumber:
-                    cout << "| " << m[t.first].value.tnumber;
-                    buf = m[t.first].value.tnumber;
-                    for (; buf > 0; space++) {
-                        buf /= 10;
-                    }
-                    break;
-                case tboolean:
-                    if (m[t.first].value.tboolean) {
-                        cout << "| +";
-                    } else {
-                        cout << "| -";
-                    }
-                    space = 1;
-                    break;
-                case tstring:
-                    cout << "| " << *m[t.first].value.tstring;
-                    space = m[t.first].value.tstring->length();
-                    break;
-                case tarray:
-                    for (auto &i : *m[t.first].value.tarray) {
-                        cout << *i.value.tstring << endl;
-                    }
-                    break;
-                case tobject:
-                    cout << endl;
-                    print(*m[t.first].value.tobject);
-                    break;
-                case empty:
-                    break;
-            }
+            space = m[t.first].asString().size();
+            cout << "| " << m[t.first].asString();
             for (int i = 0; i < 20 - space; i++) cout << " ";
             space = 0;
         }
@@ -176,7 +146,7 @@ public:
     }
     bool load() {
         pt::ptree root;
-        string fileName = "../" + name() + "Data.json";
+        string fileName = searchPath + name() + "Data.json";
         pt::read_json(fileName, root);
         T *m = new T();
         T mm;
@@ -204,7 +174,32 @@ public:
                 } else if (a.first == objectName) {
                     loadObject(m, i.second);
                 } else {
-                    (*m)[a.first] = a.second.data();
+                    if (a.second.data() == "null" || a.second.data() == "NULL") {
+                        (*m)[a.first] = ElementValue();
+                    } else if (a.second.data() == "true" || a.second.data() == "TRUE") {
+                        (*m)[a.first] = ElementValue(true);
+                    } else if (a.second.data() == "false" || a.second.data() == "FALSE") {
+                        (*m)[a.first] = ElementValue(false);
+                    } else {
+                        std::string::size_type sz;
+                        try {
+                            auto el = ElementValue(std::stoi(a.second.data(), &sz));
+                            if (sz < a.second.data().size()) {
+                                throw std::invalid_argument(a.second.data());
+                            }
+                            (*m)[a.first] = el;
+                            continue;
+                        } catch(...) {}
+                        try {
+                            auto el = ElementValue(std::stod(a.second.data(), &sz));
+                            if (sz < a.second.data().size()) {
+                                throw std::invalid_argument(a.second.data());
+                            }
+                            (*m)[a.first] = el;
+                            continue;
+                        } catch(...) {}
+                        (*m)[a.first] = ElementValue(a.second.data());
+                    }
                 }
             }
             m_elements.push_back(new T(*m));

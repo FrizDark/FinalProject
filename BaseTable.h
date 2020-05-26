@@ -10,6 +10,7 @@
 class BaseTable {
 protected:
     std::string m_name;
+    std::string m_path;
     list<Model*> m_elements;
 
     BaseTable(const std::string& name):m_name(name) {}
@@ -20,6 +21,8 @@ protected:
     pt::ptree saver(ElementValue i, map<std::string, TypeName> b);
 
 public:
+    static std::string searchPath;
+
     inline const std::string name() { return m_name; }
     inline const list<Model*> elements() { return m_elements; }
 

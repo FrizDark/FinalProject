@@ -98,16 +98,39 @@ ElementValue &ElementValue::operator=(const ElementValue &src) {
     return *this;
 }
 
+ElementValue::ElementValue(const char i[]) {
+    type = tstring;
+    value.tstring = new std::string(i);
+}
+
+std::string ElementValue::asString() const {
+    switch (type) {
+        case empty:
+            return "null";
+        case tnumber:
+            return to_string(value.tnumber);
+        case tboolean:
+            return value.tboolean ? "true" : "false";
+        case tstring:
+            return *value.tstring;
+        case tarray:
+            return "array";
+        case tobject:
+            return "object";
+        default:
+            break;
+    }
+}
+
 Model &Model::operator=(const Model &src) {
     _values = map<std::string, ElementValue>(src._values);
     return *this;
 }
 
 ElementValue &Model::operator[](const string &name) {
-    //TODO: Check name in the fields
     auto value = _values.find(name);
     if (value == _values.end()) {
-        _values[name] = new ElementValue();
+        _values[name] = ElementValue();
     }
     return _values[name];
 }
@@ -175,7 +198,5 @@ const map<std::string, TypeName> CarManagerModel::Fields() const {
     f.insert(make_pair("MobileNumber", tn));
     tn = {tnumber, "Марка машины"};
     f.insert(make_pair("Mark", tn));
-//    tn = {tnumber, "Тип машины"};
-//    f.insert(make_pair("Type", tn));
     return f;
 }

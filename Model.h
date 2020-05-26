@@ -10,10 +10,10 @@
 enum ElementType {
     empty,
     tnumber,
-    tboolean,
     tstring,
     tarray,
-    tobject
+    tobject,
+    tboolean
 };
 
 struct TypeName {
@@ -27,10 +27,10 @@ struct ElementValue {
     ElementType type;
     union {
         double tnumber;
-        bool tboolean;
         std::string* tstring;
         std::vector<ElementValue>* tarray;
         Model* tobject;
+        bool tboolean;
     } value;
 
     ElementValue() {
@@ -38,15 +38,19 @@ struct ElementValue {
     }
     ElementValue(int i);
     ElementValue(double i);
-    ElementValue(bool i);
     ElementValue(std::string const &i);
+    ElementValue(const char i[]);
     ElementValue(std::vector<ElementValue> const &i);
     ElementValue(Model &i);
+    ElementValue(bool i);
 
     ElementValue(const ElementValue &);
     ElementValue& operator=(const ElementValue&);
 
     ~ElementValue();
+
+    std::string asString() const;
+
 };
 
 class Model {

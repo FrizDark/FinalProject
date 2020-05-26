@@ -27,7 +27,7 @@ void View::join(BaseTable& ltable, const std::string& lfield, BaseTable& rtable,
     _joins.push_back(jf);
 }
 
-vector<ViewModel*> View::find(std::function<bool(ViewModel* &)> filter) {
+vector<ViewModel*> View::find(std::function<bool(ViewModel*)> filter) {
     vector<ViewModel*> output;
     for (auto &m : Values()) {
         if (filter && !filter(m)) {
@@ -40,7 +40,6 @@ vector<ViewModel*> View::find(std::function<bool(ViewModel* &)> filter) {
 
 vector<pair<std::string, TypeName>> View::Fields() {
     vector<pair<std::string, TypeName>> f;
-    boost::char_separator<char> sep{"."};
     for (auto &i : _joins) {
         for (auto &j : i.leftTable->elements()) {
             for (auto &h : j->Fields()) {
@@ -96,38 +95,8 @@ vector<ViewModel*> View::Values() {
 void View::print(pair<std::string, ElementValue> t) {
     int buf;
     int space = 0;
-    switch (t.second.type) {
-        case tnumber:
-            cout << "| " << t.second.value.tnumber;
-            buf = t.second.value.tnumber;
-            for (; buf > 0; space++) {
-                buf /= 10;
-            }
-            break;
-        case tboolean:
-            if (t.second.value.tboolean) {
-                cout << "| +";
-            } else {
-                cout << "| -";
-            }
-            space = 1;
-            break;
-        case tstring:
-            cout << "| " << *t.second.value.tstring;
-            space = t.second.value.tstring->length();
-            break;
-        case tarray:
-            for (auto &a : *t.second.value.tarray) {
-                cout << *a.value.tstring << endl;
-            }
-            break;
-        case tobject:
-            cout << endl;
-//                print(t.second.value.tobject);
-            break;
-        case empty:
-            break;
-    }
+    cout << "| " << t.second.asString();
+    space = t.second.asString().size();
     for (int i = 0; i < 20 - space; i++) cout << " ";
     space = 0;
 }

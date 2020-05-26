@@ -41,7 +41,6 @@ protected:
     list<JoinFields> _joins;
 
     map<std::string, TypeName> m_fields;
-//    vector<pair<std::string, ElementValue>> m_values;
     vector<ViewModel*> m_values;
     vector<std::string> m_printFields;
 
@@ -57,13 +56,8 @@ public:
 
     vector<ViewModel*> Values();
 
-    ElementValue get(const std::string&);
-
     virtual void print();
-    vector<ViewModel*> find(std::function<bool(ViewModel* &)> filter = NULL);
-//    ElementValue operator[] (std::string);
-
-//    void joinFields(list<JoinFields> joins);
+    vector<ViewModel*> find(std::function<bool(ViewModel*)> filter = NULL);
 };
 
 class CarModelView: public View {
@@ -75,8 +69,6 @@ public:
         m_printFields.push_back(ModelTable::instance().name() + ".Mark");
         m_printFields.push_back(ModelTable::instance().name() + ".Model");
         m_printFields.push_back(ModelTable::instance().name() + ".Type");
-//        for (const auto &i : Fields()) m_fields.insert(i);
-//        for (const auto &i : Values()) m_values.push_back(i);
     }
 };
 
@@ -93,8 +85,6 @@ public:
         m_printFields.push_back(ManagerTable::instance().name() + ".Age");
         m_printFields.push_back(ManagerTable::instance().name() + ".City");
         m_printFields.push_back(ManagerTable::instance().name() + ".MobileNumber");
-//        for (const auto &i : Fields()) m_fields.insert(i);
-//        for (const auto &i : Values()) m_values.push_back(i);
     }
 };
 

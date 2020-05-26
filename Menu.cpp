@@ -4,6 +4,13 @@
 
 #include "Menu.h"
 
+void Saver() {
+    ModelTable::instance().save();
+    CarTable::instance().save();
+    ManagerTable::instance().save();
+    CarManagerTable::instance().save();
+}
+
 void print_Success() {
     cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
     cout << "|                              Успех                              |" << endl;
@@ -30,11 +37,9 @@ void print_Create() {
     cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
 }
 
-
-
 void Menu::MainMenu() {
     bool Exit = true;
-    int menu = 0;
+    string menu;
 
     CarModelView cmv;
     CarManagerView cmmv;
@@ -54,31 +59,44 @@ void Menu::MainMenu() {
         cout << "| 0                               Выход                               0 |" << endl;
         cout << "––––––––––––––––––––––———————————–––-––––––––––––––––––––––––––––––––––——" << endl;
         cout << "-> "; cin >> menu;
-        switch (menu) {
-            case 0:
-                //TODO: Save all
-                Exit = false;
-                break;
-            case 1:
-                ManagerMenu();
-                break;
-            case 2:
-                CarModelMenu();
-                break;
-            case 3:
-                CarMenu();
-                break;
-            case 4:
-                CarManagerMenu();
-                break;
-            case 5:
-                cmv.print();
-                break;
-            case 6:
-                cmmv.print();
-                break;
-            default:
-                print_TryAgain();
+        if (menu.size() > 1) print_TryAgain();
+        else {
+            switch (menu[0]) {
+                case '0':
+                    while (true) {
+                        cout << "Сохранить (y, n) -> "; cin >> menu;
+                        if (menu == "y") {
+                            Saver();
+                            break;
+                        } else if (menu == "n") {
+                            break;
+                        } else {
+                            print_TryAgain();
+                        }
+                    }
+                    Exit = false;
+                    break;
+                case '1':
+                    ManagerMenu();
+                    break;
+                case '2':
+                    CarModelMenu();
+                    break;
+                case '3':
+                    CarMenu();
+                    break;
+                case '4':
+                    CarManagerMenu();
+                    break;
+                case '5':
+                    cmv.print();
+                    break;
+                case '6':
+                    cmmv.print();
+                    break;
+                default:
+                    print_TryAgain();
+            }
         }
     }
 }
@@ -86,7 +104,7 @@ void Menu::MainMenu() {
 void Menu::CarModelMenu() {
 
     bool Exit = true;
-    int menu = 0;
+    std::string menu;
     ModelModel m;
     string s;
 
@@ -107,10 +125,41 @@ void Menu::CarModelMenu() {
             if (!a.empty()) ModelTable::instance().print(&a);
             cout << i.second.Description << " -> ";
             cin >> s;
+
+            auto find = ElementValue();
+
+            do {
+                if (s == "null" || s == "NULL") {
+                    find = ElementValue();
+                } else if (s == "true" || s == "TRUE") {
+                    find = ElementValue(true);
+                } else if (s == "false" || s == "FALSE") {
+                    find = ElementValue(false);
+                } else {
+                    std::string::size_type sz;
+                    try {
+                        find = ElementValue(std::stoi(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    try {
+                        find = ElementValue(std::stod(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    find = ElementValue(s);
+                    break;
+                }
+            } while (true);
+
             if (!a.empty()) {
-                a = ModelTable::instance().find([i, s](ModelModel el) {return *el[i.first].value.tstring == s;}, &a);
+                a = ModelTable::instance().find([i, find](ModelModel el) { return el[i.first].asString() == find.asString(); }, &a);
             } else {
-                a = ModelTable::instance().find([i, s](ModelModel el) { return *el[i.first].value.tstring == s;});
+                a = ModelTable::instance().find([i, find](ModelModel el) { return el[i.first].asString() == find.asString(); });
             }
             if (a.empty()) {
                 print_NotFound();
@@ -127,7 +176,7 @@ void Menu::CarModelMenu() {
         print_Create();
         random_generator gen;
         string s;
-        ModelModel *m = new ModelModel();
+        auto *m = new ModelModel();
 
         for (auto &i : m->Fields()) {
             if (i.second.Description == "ID") {
@@ -156,53 +205,57 @@ void Menu::CarModelMenu() {
         cout << "| 7 |                      Найти | Назад                      | 0 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "-> "; cin >> menu;
-        switch (menu) {
-            case 0:
-                Exit = false;
-                break;
-            case 1:
-                ModelTable::instance().add(*Adder());
-                break;
-            case 2:
-                if (ModelTable::instance().remove(Finder())) {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                              Успех                              |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                } else {
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                    cout << "|                           Не найдено                            |" << endl;
-                    cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
-                }
-                break;
-            case 3:
-                m = Finder();
-                s = *m["ID"].value.tstring;
-                m = *Adder();
-                m["ID"] = s;
-                if (ModelTable::instance().update(m)) {
-                    print_Success();
-                } else {
-                    print_NotFound();
-                }
-                break;
-            case 4:
-                ModelTable::instance().print();
-                break;
-            case 5:
-                if (ModelTable::instance().save()) {
-                    print_Success();
-                }
-                break;
-            case 6:
-                if (ModelTable::instance().load()) {
-                    print_Success();
-                }
-                break;
-            case 7:
-                ModelTable::instance().printM(Finder());
-                break;
-            default:
-                print_TryAgain();
+        if (menu.size() > 1) {
+            print_TryAgain();
+        } else {
+            switch (menu[0]) {
+                case '0':
+                    Exit = false;
+                    break;
+                case '1':
+                    ModelTable::instance().add(*Adder());
+                    break;
+                case '2':
+                    if (ModelTable::instance().remove(Finder())) {
+                        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                        cout << "|                              Успех                              |" << endl;
+                        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                    } else {
+                        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                        cout << "|                           Не найдено                            |" << endl;
+                        cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
+                    }
+                    break;
+                case '3':
+                    m = Finder();
+                    s = *m["ID"].value.tstring;
+                    m = *Adder();
+                    m["ID"] = s;
+                    if (ModelTable::instance().update(m)) {
+                        print_Success();
+                    } else {
+                        print_NotFound();
+                    }
+                    break;
+                case '4':
+                    ModelTable::instance().print();
+                    break;
+                case '5':
+                    if (ModelTable::instance().save()) {
+                        print_Success();
+                    }
+                    break;
+                case '6':
+                    if (ModelTable::instance().load()) {
+                        print_Success();
+                    }
+                    break;
+                case '7':
+                    ModelTable::instance().printM(Finder());
+                    break;
+                default:
+                    print_TryAgain();
+            }
         }
     }
 }
@@ -210,7 +263,7 @@ void Menu::CarModelMenu() {
 void Menu::CarMenu() {
 
     bool Exit = true;
-    int menu = 0;
+    std::string menu;
     CarModel m;
     string s, field, value;
     int n = 1;
@@ -230,10 +283,41 @@ void Menu::CarMenu() {
             if (!a.empty()) CarTable::instance().print(&a);
             cout << i.second.Description << " -> ";
             cin >> s;
+
+            auto find = ElementValue();
+
+            do {
+                if (s == "null" || s == "NULL") {
+                    find = ElementValue();
+                } else if (s == "true" || s == "TRUE") {
+                    find = ElementValue(true);
+                } else if (s == "false" || s == "FALSE") {
+                    find = ElementValue(false);
+                } else {
+                    std::string::size_type sz;
+                    try {
+                        find = ElementValue(std::stoi(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    try {
+                        find = ElementValue(std::stod(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    find = ElementValue(s);
+                    break;
+                }
+            } while (true);
+
             if (!a.empty()) {
-                a = CarTable::instance().find([i, s](CarModel el) {return *el[i.first].value.tstring == s;}, &a);
+                a = CarTable::instance().find([i, find](CarModel el) { return el[i.first].asString() == find.asString(); }, &a);
             } else {
-                a = CarTable::instance().find([i, s](CarModel el) { return *el[i.first].value.tstring == s;});
+                a = CarTable::instance().find([i, find](CarModel el) { return el[i.first].asString() == find.asString(); });
             }
             if (a.empty()) {
                 print_NotFound();
@@ -250,7 +334,7 @@ void Menu::CarMenu() {
         print_Create();
         random_generator gen;
         string s;
-        CarModel *m = new CarModel();
+        auto *m = new CarModel();
 
         ModelModel cmm;
 
@@ -263,10 +347,41 @@ void Menu::CarMenu() {
             if (!a.empty()) carModelTable.print(&a);
             cout << i.second.Description << " -> ";
             cin >> s;
+
+            auto find = ElementValue();
+
+            do {
+                if (s == "null" || s == "NULL") {
+                    find = ElementValue();
+                } else if (s == "true" || s == "TRUE") {
+                    find = ElementValue(true);
+                } else if (s == "false" || s == "FALSE") {
+                    find = ElementValue(false);
+                } else {
+                    std::string::size_type sz;
+                    try {
+                        find = ElementValue(std::stoi(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    try {
+                        find = ElementValue(std::stod(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    find = ElementValue(s);
+                    break;
+                }
+            } while (true);
+
             if (!a.empty()) {
-                a = carModelTable.find([i, s](ModelModel el) {return *el[i.first].value.tstring == s;}, &a);
+                a = ModelTable::instance().find([i, find](ModelModel el) { return el[i.first].asString() == find.asString(); }, &a);
             } else {
-                a = carModelTable.find([i, s](ModelModel el) { return *el[i.first].value.tstring == s;});
+                a = ModelTable::instance().find([i, find](ModelModel el) { return el[i.first].asString() == find.asString(); });
             }
             if (a.empty()) {
                 print_NotFound();
@@ -317,50 +432,54 @@ void Menu::CarMenu() {
         cout << "| 7 |                      Найти | Назад                      | 0 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "-> "; cin >> menu;
-        switch (menu) {
-            case 0:
-                Exit = false;
-                break;
-            case 1:
-                CarTable::instance().add(*Adder(ModelTable::instance()));
-                break;
-            case 2:
-                if (CarTable::instance().remove(Finder())) {
-                    print_Success();
-                } else {
-                    print_NotFound();
-                }
-                break;
-            case 3:
-                m = Finder();
-                s = *m["ID"].value.tstring;
-                m = *Adder(ModelTable::instance());
-                m["ID"] = s;
-                if (CarTable::instance().update(m)) {
-                    print_Success();
-                } else {
-                    print_NotFound();
-                }
-                break;
-            case 4:
-                CarTable::instance().print();
-                break;
-            case 5:
-                if (CarTable::instance().save()) {
-                    print_Success();
-                }
-                break;
-            case 6:
-                if (ModelTable::instance().elements().empty()) ModelTable::instance().load();
-                if (CarTable::instance().load()) {
-                    print_Success();
-                }
-                break;
-            case 7:
-                CarTable::instance().printM(Finder());
-                break;
-            default:
-                print_TryAgain();
+        if (menu.size() > 1) {
+            print_TryAgain();
+        } else {
+            switch (menu[0]) {
+                case '0':
+                    Exit = false;
+                    break;
+                case '1':
+                    CarTable::instance().add(*Adder(ModelTable::instance()));
+                    break;
+                case '2':
+                    if (CarTable::instance().remove(Finder())) {
+                        print_Success();
+                    } else {
+                        print_NotFound();
+                    }
+                    break;
+                case '3':
+                    m = Finder();
+                    s = *m["ID"].value.tstring;
+                    m = *Adder(ModelTable::instance());
+                    m["ID"] = s;
+                    if (CarTable::instance().update(m)) {
+                        print_Success();
+                    } else {
+                        print_NotFound();
+                    }
+                    break;
+                case '4':
+                    CarTable::instance().print();
+                    break;
+                case '5':
+                    if (CarTable::instance().save()) {
+                        print_Success();
+                    }
+                    break;
+                case '6':
+                    if (ModelTable::instance().elements().empty()) ModelTable::instance().load();
+                    if (CarTable::instance().load()) {
+                        print_Success();
+                    }
+                    break;
+                case '7':
+                    CarTable::instance().printM(Finder());
+                    break;
+                default:
+                    print_TryAgain();
+            }
         }
     }
 }
@@ -368,7 +487,7 @@ void Menu::CarMenu() {
 void Menu::ManagerMenu() {
 
     bool Exit = true;
-    int menu = 0;
+    std::string menu;
     ManagerModel m;
     string s;
 
@@ -389,10 +508,41 @@ void Menu::ManagerMenu() {
             if (!a.empty()) ManagerTable::instance().print(&a);
             cout << i.second.Description << " -> ";
             cin >> s;
+
+            auto find = ElementValue();
+
+            do {
+                if (s == "null" || s == "NULL") {
+                    find = ElementValue();
+                } else if (s == "true" || s == "TRUE") {
+                    find = ElementValue(true);
+                } else if (s == "false" || s == "FALSE") {
+                    find = ElementValue(false);
+                } else {
+                    std::string::size_type sz;
+                    try {
+                        find = ElementValue(std::stoi(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    try {
+                        find = ElementValue(std::stod(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    find = ElementValue(s);
+                    break;
+                }
+            } while (true);
+
             if (!a.empty()) {
-                a = ManagerTable::instance().find([i, s](ManagerModel el) {return *el[i.first].value.tstring == s;}, &a);
+                a = ManagerTable::instance().find([i, find](ManagerModel el) { return el[i.first].asString() == find.asString(); }, &a);
             } else {
-                a = ManagerTable::instance().find([i, s](ManagerModel el) { return *el[i.first].value.tstring == s;});
+                a = ManagerTable::instance().find([i, find](ManagerModel el) { return el[i.first].asString() == find.asString(); });
             }
             if (a.empty()) {
                 print_NotFound();
@@ -410,7 +560,7 @@ void Menu::ManagerMenu() {
         random_generator gen;
         string s;
         int n;
-        ManagerModel *m = new ManagerModel();
+        auto *m = new ManagerModel();
 
         for (auto &i : (*m).Fields()) {
             if (i.second.Description == "ID") {
@@ -439,49 +589,53 @@ void Menu::ManagerMenu() {
         cout << "| 7 |                      Найти | Назад                      | 0 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "-> "; cin >> menu;
-        switch (menu) {
-            case 0:
-                Exit = false;
-                break;
-            case 1:
-                ManagerTable::instance().add(*Adder());
-                break;
-            case 2:
-                if (ManagerTable::instance().remove(Finder())) {
-                    print_Success();
-                } else {
-                    print_NotFound();
-                }
-                break;
-            case 3:
-                m = Finder();
-                s = *m["ID"].value.tstring;
-                m = *Adder();
-                m["ID"] = s;
-                if (ManagerTable::instance().update(m)) {
-                    print_Success();
-                } else {
-                    print_NotFound();
-                }
-                break;
-            case 4:
-                ManagerTable::instance().print();
-                break;
-            case 5:
-                if (ManagerTable::instance().save()) {
-                    print_Success();
-                }
-                break;
-            case 6:
-                if (ManagerTable::instance().load()) {
-                    print_Success();
-                }
-                break;
-            case 7:
-                ManagerTable::instance().printM(Finder());
-                break;
-            default:
-                print_TryAgain();
+        if (menu.size() > 1) {
+            print_TryAgain();
+        } else {
+            switch (menu[0]) {
+                case '0':
+                    Exit = false;
+                    break;
+                case '1':
+                    ManagerTable::instance().add(*Adder());
+                    break;
+                case '2':
+                    if (ManagerTable::instance().remove(Finder())) {
+                        print_Success();
+                    } else {
+                        print_NotFound();
+                    }
+                    break;
+                case '3':
+                    m = Finder();
+                    s = *m["ID"].value.tstring;
+                    m = *Adder();
+                    m["ID"] = s;
+                    if (ManagerTable::instance().update(m)) {
+                        print_Success();
+                    } else {
+                        print_NotFound();
+                    }
+                    break;
+                case '4':
+                    ManagerTable::instance().print();
+                    break;
+                case '5':
+                    if (ManagerTable::instance().save()) {
+                        print_Success();
+                    }
+                    break;
+                case '6':
+                    if (ManagerTable::instance().load()) {
+                        print_Success();
+                    }
+                    break;
+                case '7':
+                    ManagerTable::instance().printM(Finder());
+                    break;
+                default:
+                    print_TryAgain();
+            }
         }
     }
 }
@@ -489,7 +643,7 @@ void Menu::ManagerMenu() {
 void Menu::CarManagerMenu() {
 
     bool Exit = true;
-    int menu = 0;
+    std::string menu;
     CarManagerModel m;
     string s;
 
@@ -511,10 +665,41 @@ void Menu::CarManagerMenu() {
             if (!a.empty()) CarManagerTable::instance().print(&a);
             cout << i.second.Description << " -> ";
             cin >> s;
+
+            auto find = ElementValue();
+
+            do {
+                if (s == "null" || s == "NULL") {
+                    find = ElementValue();
+                } else if (s == "true" || s == "TRUE") {
+                    find = ElementValue(true);
+                } else if (s == "false" || s == "FALSE") {
+                    find = ElementValue(false);
+                } else {
+                    std::string::size_type sz;
+                    try {
+                        find = ElementValue(std::stoi(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    try {
+                        find = ElementValue(std::stod(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    find = ElementValue(s);
+                    break;
+                }
+            } while (true);
+
             if (!a.empty()) {
-                a = CarManagerTable::instance().find([i, s](CarManagerModel el) {return *el[i.first].value.tstring == s;}, &a);
+                a = CarManagerTable::instance().find([i, find](CarManagerModel el) { return el[i.first].asString() == find.asString(); }, &a);
             } else {
-                a = CarManagerTable::instance().find([i, s](CarManagerModel el) { return *el[i.first].value.tstring == s;});
+                a = CarManagerTable::instance().find([i, find](CarManagerModel el) { return el[i.first].asString() == find.asString(); });
             }
             if (a.empty()) {
                 print_NotFound();
@@ -532,7 +717,7 @@ void Menu::CarManagerMenu() {
         print_Create();
         random_generator gen;
         string s;
-        CarManagerModel *m = new CarManagerModel();
+        auto *m = new CarManagerModel();
 
         CarModel cm;
         ManagerModel mm;
@@ -546,10 +731,41 @@ void Menu::CarManagerMenu() {
             if (!a.empty()) carTable.print(&a);
             cout << i.second.Description << " -> ";
             cin >> s;
+
+            auto find = ElementValue();
+
+            do {
+                if (s == "null" || s == "NULL") {
+                    find = ElementValue();
+                } else if (s == "true" || s == "TRUE") {
+                    find = ElementValue(true);
+                } else if (s == "false" || s == "FALSE") {
+                    find = ElementValue(false);
+                } else {
+                    std::string::size_type sz;
+                    try {
+                        find = ElementValue(std::stoi(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    try {
+                        find = ElementValue(std::stod(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    find = ElementValue(s);
+                    break;
+                }
+            } while (true);
+
             if (!a.empty()) {
-                a = carTable.find([i, s](CarModel el) {return *el[i.first].value.tstring == s;}, &a);
+                a = CarTable::instance().find([i, find](CarModel el) { return el[i.first].asString() == find.asString(); }, &a);
             } else {
-                a = carTable.find([i, s](CarModel el) { return *el[i.first].value.tstring == s;});
+                a = CarTable::instance().find([i, find](CarModel el) { return el[i.first].asString() == find.asString(); });
             }
             if (a.empty()) {
                 print_NotFound();
@@ -574,10 +790,41 @@ void Menu::CarManagerMenu() {
             if (!aa.empty()) managerTable.print(&aa);
             cout << i.second.Description << " -> ";
             cin >> s;
-            if (!aa.empty()) {
-                aa = managerTable.find([i, s](ManagerModel el) {return *el[i.first].value.tstring == s;}, &aa);
+
+            auto find = ElementValue();
+
+            do {
+                if (s == "null" || s == "NULL") {
+                    find = ElementValue();
+                } else if (s == "true" || s == "TRUE") {
+                    find = ElementValue(true);
+                } else if (s == "false" || s == "FALSE") {
+                    find = ElementValue(false);
+                } else {
+                    std::string::size_type sz;
+                    try {
+                        find = ElementValue(std::stoi(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    try {
+                        find = ElementValue(std::stod(s, &sz));
+                        if (sz < s.size()) {
+                            throw std::invalid_argument(s);
+                        }
+                        break;
+                    } catch(...) {}
+                    find = ElementValue(s);
+                    break;
+                }
+            } while (true);
+
+            if (!a.empty()) {
+                aa = ManagerTable::instance().find([i, find](ManagerModel el) { return el[i.first].asString() == find.asString(); }, &aa);
             } else {
-                aa = managerTable.find([i, s](ManagerModel el) { return *el[i.first].value.tstring == s;});
+                aa = ManagerTable::instance().find([i, find](ManagerModel el) { return el[i.first].asString() == find.asString(); });
             }
             if (aa.empty()) {
                 print_NotFound();
@@ -614,13 +861,7 @@ void Menu::CarManagerMenu() {
             } else if (i.first == "Mark") {
                 (*m)["Mark"] = *cm["Mark"].value.tstring;
                 continue;
-            } //else if (i.first == "Type") {
-//                (*m)["Type"] = *cm["Type"].value.tstring;
-//                continue;
-//            }
-//            cout << i.second.Description << " -> ";
-//            cin >> s;
-//            (*m)[i.first] = s;
+            }
         }
 
         return m;
@@ -640,50 +881,52 @@ void Menu::CarManagerMenu() {
         cout << "| 7 |                      Найти | Назад                      | 0 |" << endl;
         cout << "––––––––––––––––––––––———————————-–––––––––––––––––––––––––––––––——" << endl;
         cout << "-> "; cin >> menu;
-        switch (menu) {
-            case 0:
-                Exit = false;
-                break;
-            case 1:
-                CarManagerTable::instance().add(*Adder(ManagerTable::instance(), CarTable::instance()));
-                break;
-            case 2:
-                if (CarManagerTable::instance().remove(Finder())) {
-                    print_Success();
-                } else {
-                    print_NotFound();
-                }
-                break;
-            case 3:
-                m = Finder();
-//                s = *m["ID"].value.tstring;
-                m = *Adder(ManagerTable::instance(), CarTable::instance());
-//                m["ID"] = s;
-                if (CarManagerTable::instance().update(m)) {
-                    print_Success();
-                } else {
-                    print_NotFound();
-                }
-                break;
-            case 4:
-                CarManagerTable::instance().print();
-                break;
-            case 5:
-                if (CarManagerTable::instance().save()) {
-                    print_Success();
-                }
-                break;
-            case 6:
-                if (ModelTable::instance().elements().empty()) ModelTable::instance().load();
-                if (CarTable::instance().load()) {
-                    print_Success();
-                }
-                break;
-            case 7:
-                CarManagerTable::instance().printM(Finder());
-                break;
-            default:
-                print_TryAgain();
+        if (menu.size() > 1) {
+            print_TryAgain();
+        } else {
+            switch (menu[0]) {
+                case '0':
+                    Exit = false;
+                    break;
+                case '1':
+                    CarManagerTable::instance().add(*Adder(ManagerTable::instance(), CarTable::instance()));
+                    break;
+                case '2':
+                    if (CarManagerTable::instance().remove(Finder())) {
+                        print_Success();
+                    } else {
+                        print_NotFound();
+                    }
+                    break;
+                case '3':
+                    m = Finder();
+                    m = *Adder(ManagerTable::instance(), CarTable::instance());
+                    if (CarManagerTable::instance().update(m)) {
+                        print_Success();
+                    } else {
+                        print_NotFound();
+                    }
+                    break;
+                case '4':
+                    CarManagerTable::instance().print();
+                    break;
+                case '5':
+                    if (CarManagerTable::instance().save()) {
+                        print_Success();
+                    }
+                    break;
+                case '6':
+                    if (ModelTable::instance().elements().empty()) ModelTable::instance().load();
+                    if (CarTable::instance().load()) {
+                        print_Success();
+                    }
+                    break;
+                case '7':
+                    CarManagerTable::instance().printM(Finder());
+                    break;
+                default:
+                    print_TryAgain();
+            }
         }
     }
 }

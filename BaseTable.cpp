@@ -100,14 +100,13 @@ pt::ptree BaseTable::saver(ElementValue i, map<std::string, TypeName> b) {
     return rootObjectElements;
 }
 
+std::string BaseTable::searchPath = "../";
+
 bool BaseTable::save() {
     pt::ptree root;
     root.add_child(name(), saver());
-    /*TODO: Save in one file:
-     * string fileName = "../" + name() + ".json";
-     * pt::write_json(fileName, root);
-    */
-    pt::write_json("../TestJSON.json", root);
+    string fileName = searchPath + name() + "Data.json";
+    pt::write_json(fileName, root);
     return true;
 }
 
